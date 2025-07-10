@@ -14,6 +14,9 @@
 /coverage
 test-results
 
+# sonarqube
+.scannerwork/
+
 # next.js
 /.next/
 /out/
