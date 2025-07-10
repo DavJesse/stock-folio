@@ -3,7 +3,7 @@ import { defineConfig } from '@playwright/test';
 // Playwright configuration file
 export default defineConfig({
     // Directory containing test files
-    testDir: './tests',
+    testDir: './tests/e2e',
     // Maximum time allowed for a single test (milliseconds)
     timeout: 30 * 1000,
     // Number of retries per test on failure
