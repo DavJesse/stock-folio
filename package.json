@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "test:e2e": "playwright test"
+    "test:e2e": "cp tsconfig.json tsconfig.json.bak && TS_NODE_PROJECT=tsconfig.e2e.json playwright test && cp tsconfig.json.bak tsconfig.json && rm tsconfig.json.bak"
   },
   "dependencies": {
     "next": "15.3.5",
