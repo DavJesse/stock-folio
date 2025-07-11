@@ -1,0 +1,97 @@
+name: CI
+
+# Trigger workflow on push and pull request to key branches
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'chore/**'
+      - 'docs/**'
+      - 'ci/**' 
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-test:
+    name: Install, Lint & Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x] # Easily upgrade Node by adjusting this
+    steps:
+      # Step 1: Checkout source code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js and cache node_modules
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      # Step 3: Install dependencies with clean CI-friendly method
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4: Run linter to catch stylistic or formatting issues
+      - name: Lint code
+        run: npm run lint
+
+      # Step 5: Run unit and snapshot tests via Jest
+      - name: Run unit & snapshot tests
+        run: npm test
+
+      # Step 6: Install Playwright browsers and system dependencies
+      - name: Install Playwright dependencies and browsers
+        run: |
+          npx playwright install-deps
+          npx playwright install
+
+      # Step 7: Run Playwright E2E tests
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+  sonar:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    # Only run if SonarQube credentials are available
+    if: secrets.SONAR_TOKEN && secrets.SONAR_HOST_URL
+    steps:
+      # Step 1: Checkout source code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Java for SonarScanner (required)
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Step 3: Download and install SonarScanner CLI
+      - name: Install SonarScanner CLI
+        run: |
+          wget -qO- https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip \
+            | funzip > sonar-scanner.zip
+          unzip -q sonar-scanner.zip
+          sudo mv sonar-scanner-* /opt/sonar-scanner
+
+      # Step 4: Add SonarScanner CLI to system PATH
+      - name: Add SonarScanner to PATH
+        run: echo "/opt/sonar-scanner/bin" >> $GITHUB_PATH
+
+      # Step 5: Run SonarScanner with secret credentials
+      - name: Run SonarScanner
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          sonar-scanner \
+            -Dsonar.login=$SONAR_TOKEN \
+            -Dsonar.host.url=$SONAR_HOST_URL
