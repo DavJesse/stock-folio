@@ -12,6 +12,7 @@
     "test:e2e": "cp tsconfig.json tsconfig.json.bak && TS_NODE_PROJECT=tsconfig.e2e.json playwright test && cp tsconfig.json.bak tsconfig.json && rm tsconfig.json.bak"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.2.0",
     "next": "15.3.5",
     "react": "^19.0.0",
