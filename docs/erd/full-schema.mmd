@@ -1,0 +1,80 @@
+erDiagram
+    %% A user can have multiple transactions (buy/sell stocks)
+    users ||--o{ transactions : has
+
+    %% A user can create multiple sessions (for authentication)
+    users ||--o{ sessions : creates
+
+    %% Each transaction involves a specific stock
+    stocks ||--o{ transactions : includes
+
+    users {
+        %% Primary key for user
+        INTEGER id PK
+
+        %% Unique email for login/identification
+        TEXT email "UNIQUE"
+
+        %% Securely stored password hash
+        TEXT password_hash
+
+        %% Timestamp for account creation
+        DATETIME created_at
+    }
+
+    transactions {
+        %% Primary key for transaction
+        INTEGER id PK
+
+        %% Foreign key: references users
+        INTEGER user_id FK
+
+        %% Foreign key: references stocks
+        INTEGER stock_id FK
+
+        %% 'buy' or 'sell' (could be enum in DB)
+        TEXT transaction_type
+
+        %% Number of shares transacted
+        INTEGER quantity
+
+        %% Price per share at transaction time
+        REAL price_at_transaction
+
+        %% When transaction occurred
+        DATETIME timestamp
+    }
+
+    sessions {
+        %% Primary key for session
+        INTEGER id PK
+
+        %% Foreign key: references users
+        INTEGER user_id FK
+
+        %% Session token for authentication
+        TEXT token
+
+        %% Expiry time for session
+        DATETIME expires_at
+
+        %% When session was created
+        DATETIME created_at
+    }
+
+    stocks {
+         %% Primary key for stock
+        INTEGER id PK
+
+        %% Unique stock ticker symbol
+        TEXT ticker "UNIQUE"
+
+        %% Full company name
+        TEXT company_name
+
+        %% Most recent price (for display, not transactional)
+        REAL last_price
+        
+        %% When last_price was updated
+        DATETIME updated_at
+    }
