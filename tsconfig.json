@@ -13,13 +13,14 @@
     "isolatedModules": true, // Ensure each file can be safely transpiled without relying on other imports
     "jsx": "react-jsx", // Use the new JSX transform (React 17+)
     "incremental": true, // Enable incremental compilation for faster rebuilds
+    "baseUrl": ".", // Base directory to resolve non-relative module names
     "plugins": [
       {
         "name": "next" // Next.js TypeScript plugin for improved DX
       }
     ],
     "paths": {
-      "@/*": ["./src/*"] // Path alias for cleaner imports
+      "@/*": ["./*"] // Path alias for cleaner imports
     }
   },
   "include": [
