@@ -8,6 +8,7 @@ on:
       - develop
       - 'feature/**'
       - 'chore/**'
+      - 'auth/**'
       - 'docs/**'
       - 'ci/**' 
   pull_request:
