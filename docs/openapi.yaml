@@ -1,0 +1,75 @@
+# OpenAPI specification for the Stock Portfolio Tracker API
+openapi: 3.0.3
+
+# General API metadata used by tools like Swagger UI
+info:
+  title: Stock Portfolio Tracker API           # Human-readable name of the API
+  version: 1.0.0                                # Semantic version of the API definition
+  description: >                                # Brief explanation of the API's purpose
+    REST API for a simulated stock portfolio tracker, including 
+    user authentication and portfolio management.
+
+# Define the base URL for the API endpoints
+servers:
+  - url: https://localhost:3000/api             # Local development server base path
+    description: Development server             # Label for server usage context
+
+# Endpoint definitions grouped under `paths`
+paths:
+  /auth/signup:
+    post:
+      summary: Register a new user account      # Short description for API docs and UIs
+      tags: [Authentication]                    # Logical grouping for endpoints
+      requestBody:
+        required: true                          # Indicates this endpoint requires a body
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]       # Mandatory fields in the request payload
+              properties:
+                email:
+                  type: string                  # User's email address
+                password:
+                  type: string                  # User's plaintext password (to be hashed server-side)
+
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string                # Success message (e.g., "User created")
+
+        '400':
+          description: Invalid input            # Triggered by missing or malformed fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string                # Error description (e.g., validation error)
+
+        '409':
+          description: User already exists      # Triggered if email is already registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string                # Error message (e.g., "User already exists.")
+
+        '500':
+          description: Internal server error    # Catch-all for unhandled exceptions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string                # Generic error message (e.g., "Internal server error")
