@@ -2,9 +2,9 @@
 import '@testing-library/jest-dom';
 
 // Polyfill `fetch` and related classes for use in Node.js testing environments.
-// Jest tests run in Node, which lacks native `fetch`, so we simulate a browser-like environment using node-fetch.
-// `require` is used here instead of `import` to avoid ESM compatibility issues.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// Jest runs in Node, which lacks native `fetch`. We use `node-fetch` to simulate the browser environment.
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- node-fetch is ESM-only; require avoids ESM import errors in Jest
 const fetch = require('node-fetch');
 
 // Destructure required Web API constructors from node-fetch
