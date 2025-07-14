@@ -2,7 +2,7 @@
 // Uses ts-jest to handle TypeScript and JSX/TSX files
 // Ensures browser-like testing environment and clean module imports
 
-export default {
+const config = {
   // Use ts-jest preset to handle TypeScript and TSX files
   preset: 'ts-jest',
 
@@ -25,3 +25,5 @@ export default {
   // Ignore test paths in node_modules and e2e tests
   testPathIgnorePatterns: ['/node_modules/', '/tests/e2e/'],
 };
+
+export default config;
