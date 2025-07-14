@@ -1,109 +1,78 @@
-import bcrypt from 'bcrypt';
-import { NextRequest } from 'next/server';
-import { ReadableStream } from 'node:stream/web'; // Required for Blob in Node.js test env
 import db from '@/lib/db';
-import { POST as handler } from '@/app/api/auth/signup/route';
+import bcrypt from 'bcrypt';
+import { handleSignup } from '@/lib/handlers/signup';
+import { User } from '@/types/user';
 
-// Utility to simulate NextRequest from body
-// This allows us to test API routes as if they were receiving real HTTP requests.
-function createNextRequest(body: Record<string, any>): NextRequest {
-    const json = JSON.stringify(body);
-    const blob = new Blob([json], { type: 'application/json' });
+// Clear the users table before each test to ensure isolation
+beforeEach(() => {
+  db.prepare('DELETE FROM users').run();
+});
 
-    return new NextRequest('http://localhost/api/auth/signup', {
-        method: 'POST',
-        body: blob,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-}
-
-describe('POST /api/auth/signup', () => {
-    beforeEach(() => {
-        // Ensure a clean slate for each test by clearing the users table.
-        db.prepare('DELETE FROM users').run();
+describe('handleSignup', () => {
+  it('should return 201 when a new user is successfully registered', async () => {
+    const res = await handleSignup({
+      email: 'test@example.com',
+      password: 'securePass123',
     });
 
-    it('should return 201 when a new user is successfully registered', async () => {
-        const req = createNextRequest({
-            email: 'test@example.com',
-            password: 'securePass123',
-        });
+    expect(res.status).toBe(201);
+    expect(res.body).toEqual({ message: 'User created' });
 
-        const res = await handler(req);
+    // Check that the user was actually inserted into the database
+    const user = db
+      .prepare('SELECT * FROM users WHERE email = ?')
+      .get('test@example.com') as User;
 
-        expect(res.status).toBe(201);
-        const data = await res.json();
-        expect(data.message).toBe('User created');
+    expect(user).toBeDefined();
+    expect(user.email).toBe('test@example.com');
+  });
 
-        // Verify user was actually inserted into the database.
-        const user = db
-            .prepare('SELECT * FROM users WHERE email = ?')
-            .get('test@example.com') as {
-                email: string;
-                password_hash: string;
-                created_at: string;
-            } | undefined;
-
-        expect(user).toBeDefined();
-        expect(user!.email).toBe('test@example.com');
+  it('should return 400 when email or password is missing', async () => {
+    // Provide empty fields to simulate bad input
+    const res = await handleSignup({
+      email: '',
+      password: '',
     });
 
-    it('should return 400 when email or password is missing', async () => {
-        // Intentionally passing empty strings to simulate missing fields.
-        const req = createNextRequest({ email: '', password: '' });
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'Email and password are required.' });
+  });
 
-        const res = await handler(req);
+  it('should return 409 when user already exists', async () => {
+    // Seed the database with an existing user to trigger a conflict
+    db.prepare(
+      'INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, datetime(\'now\', \'localtime\'))'
+    ).run('test@example.com', 'somehash');
 
-        expect(res.status).toBe(400);
-        const data = await res.json();
-        expect(data.error).toBeDefined();
+    const res = await handleSignup({
+      email: 'test@example.com',
+      password: 'anything',
     });
 
-    it('should return 409 when user already exists', async () => {
-        // Seed DB with a user to trigger conflict scenario.
-        db.prepare(
-            'INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, datetime("now"))'
-        ).run('test@example.com', 'hashedpassword');
+    expect(res.status).toBe(409);
+    expect(res.body).toEqual({ error: 'User already exists.' });
+  });
 
-        const req = createNextRequest({
-            email: 'test@example.com',
-            password: 'anotherPassword',
-        });
+  it('should hash the password before storing', async () => {
+    const plainPassword = 'securePass123';
 
-        const res = await handler(req);
-
-        expect(res.status).toBe(409);
-        const data = await res.json();
-        expect(data.error).toMatch(/already exists/i);
+    const res = await handleSignup({
+      email: 'hashcheck@example.com',
+      password: plainPassword,
     });
 
-    it('should hash the password before storing', async () => {
-        const plainPassword = 'securePass123';
+    expect(res.status).toBe(201);
 
-        const req = createNextRequest({
-            email: 'hashcheck@example.com',
-            password: plainPassword,
-        });
+    // Fetch the user and validate that the stored password is hashed
+    const user = db
+      .prepare('SELECT * FROM users WHERE email = ?')
+      .get('hashcheck@example.com') as User;
 
-        const res = await handler(req);
-        expect(res.status).toBe(201);
+    expect(user).toBeDefined();
+    expect(user.password_hash).not.toBe(plainPassword);
 
-        // Retrieve the user to check password hashing.
-        const user = db
-            .prepare('SELECT * FROM users WHERE email = ?')
-            .get('hashcheck@example.com') as {
-                email: string;
-                password_hash: string;
-                created_at: string;
-            };
-
-        expect(user).toBeDefined();
-        expect(user.password_hash).not.toBe(plainPassword);
-
-        // Ensure the stored hash matches the original password.
-        const isMatch = await bcrypt.compare(plainPassword, user.password_hash);
-        expect(isMatch).toBe(true);
-    });
+    // Ensure the hashed password matches the original plain password
+    const isMatch = await bcrypt.compare(plainPassword, user.password_hash);
+    expect(isMatch).toBe(true);
+  });
 });
