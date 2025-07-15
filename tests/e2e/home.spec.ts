@@ -10,7 +10,7 @@
  */
 import { test, expect } from '@playwright/test';
 
-test('homepage displays welcome message', async ({ page }) => {
+test('homepage sign up form', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText(/get started by editing/i)).toBeVisible();
+  await expect(page.getByText(/Email:/i)).toBeVisible();
 });
