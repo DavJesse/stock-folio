@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import SignUpForm from '@/src/components/SignUpForm';
+import SignUpForm from '@/components/SignUpForm';
 import '@testing-library/jest-dom';
 
 global.fetch = jest.fn();
