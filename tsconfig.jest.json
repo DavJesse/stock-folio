@@ -1,0 +1,19 @@
+{
+  // Extend the base tsconfig to inherit shared compiler options
+  "extends": "./tsconfig.json",
+
+  "compilerOptions": {
+    // Use the new JSX transform (React 17+) for better performance and cleaner output
+    "jsx": "react-jsx"
+  },
+
+  "include": [
+    // Include all source files for test compilation
+    "src/**/*.ts",
+    "src/**/*.tsx",
+
+    // Include test files in __tests__ folders
+    "__tests__/**/*.ts",
+    "__tests__/**/*.tsx"
+  ]
+}
