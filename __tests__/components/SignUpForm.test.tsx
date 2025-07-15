@@ -94,15 +94,52 @@ describe('SignUpForm', () => {
       status: 201,
       json: async () => ({ message: 'User created' }),
     });
-
+  
     render(<SignUpForm />);
-
+  
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'test@example.com' } });
     fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'securePass123' } });
     fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'securePass123' } });
+  
     fireEvent.click(screen.getByRole('button', { name: /sign up/i }));
-
+  
     expect(await screen.findByText(/account created successfully/i)).toBeInTheDocument();
+  });
+
+  it('shows error if any input field is left empty', async () => {
+    render(<SignUpForm />);
+
+    // Leave email blank, fill other fields
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'password123' } });
+    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'password123' } });
+
+    fireEvent.submit(screen.getByRole('form', { name: /signup-form/i }));
+
+    expect(await screen.findByText(/all fields are required/i)).toBeInTheDocument();
+    expect(fetch).not.toHaveBeenCalled(); // Ensure no network request
+  });
+
+  it('clears form inputs after successful submission', async () => {
+    (fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 201,
+      json: async () => ({ message: 'User created' }),
+    });
+  
+    render(<SignUpForm />);
+  
+    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'reset@example.com' } });
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'validPass123' } });
+    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'validPass123' } });
+  
+    fireEvent.click(screen.getByRole('button', { name: /sign up/i }));
+  
+    expect(await screen.findByText(/account created successfully/i)).toBeInTheDocument();
+  
+    // Inputs should be cleared
+    expect(screen.getByLabelText('Email:')).toHaveValue('');
+    expect(screen.getByLabelText('Password:')).toHaveValue('');
+    expect(screen.getByLabelText('Confirm Password:')).toHaveValue('');
   });
 
   it('displays error message on 400 or 409 response', async () => {
