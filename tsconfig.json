@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017", // Specify ECMAScript target version
-    "lib": ["dom", "dom.iterable", "esnext"], // Include library files for DOM and latest ECMAScript features
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ], // Include library files for DOM and latest ECMAScript features
     "allowJs": true, // Allow JavaScript files to be compiled
     "skipLibCheck": true, // Skip type checking of declaration files for faster builds
     "strict": true, // Enable all strict type-checking options
@@ -11,7 +15,7 @@
     "moduleResolution": "bundler", // Use bundler-compatible module resolution
     "resolveJsonModule": true, // Allow importing .json files as modules
     "isolatedModules": true, // Ensure each file can be safely transpiled without relying on other imports
-    "jsx": "react-jsx", // Use the new JSX transform (React 17+)
+    "jsx": "preserve",
     "incremental": true, // Enable incremental compilation for faster rebuilds
     "baseUrl": ".", // Base directory to resolve non-relative module names
     "plugins": [
@@ -20,7 +24,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"] // Path alias for cleaner imports
+      "@/*": [
+        "./*"
+      ] // Path alias for cleaner imports
     }
   },
   "include": [
