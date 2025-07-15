@@ -24,6 +24,12 @@ const config = {
 
   // Ignore test paths in node_modules and e2e tests
   testPathIgnorePatterns: ['/node_modules/', '/tests/e2e/'],
+
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.jest.json'
+    }
+  }
 };
 
 export default config;
