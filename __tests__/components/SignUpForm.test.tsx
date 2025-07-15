@@ -30,6 +30,42 @@ describe('SignUpForm', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it('shows error if passwords do not match', async () => {
+    render(<SignUpForm />);
+
+    fireEvent.change(screen.getByLabelText('Email:'), {
+      target: { value: 'user@example.com' }
+    });
+    fireEvent.change(screen.getByLabelText('Password:'), {
+      target: { value: 'password123' }
+    });
+    fireEvent.change(screen.getByLabelText('Confirm Password:'), {
+      target: { value: 'wrongpass' }
+    });
+
+    // Use form submission instead of clicking a disabled button
+    fireEvent.submit(screen.getByRole('form', { name: /signup-form/i }));
+
+    expect(await screen.findByText(/passwords do not match/i)).toBeInTheDocument();
+  });
+
+  it('shows fallback error when response is not valid JSON', async () => {
+    (fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      json: async () => {
+        throw new Error('Invalid JSON');
+      },
+    });
+
+    render(<SignUpForm />);
+    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'fail@example.com' } });
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'password123' } });
+    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: /sign up/i }));
+
+    expect(await screen.findByText(/invalid server response/i)).toBeInTheDocument();
+  });
+
   it('shows password length error when password is too short', async () => {
     render(<SignUpForm />);
 
