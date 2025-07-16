@@ -1,3 +1,6 @@
+// Silence error logs globally for this test file
+jest.spyOn(console, 'error').mockImplementation(() => {})
+
 // Import the function under test
 import { findUserByEmail } from '@/lib/queries/users'
 
@@ -16,7 +19,6 @@ jest.mock('@/lib/db', () => {
 })
 
 describe('findUserByEmail', () => {
-  // Define a sample user object to be returned by mock queries
   const mockUser: User = {
     id: 1,
     email: 'test@example.com',
@@ -25,13 +27,12 @@ describe('findUserByEmail', () => {
   }
 
   beforeEach(() => {
-    // Reset all mock state before each test to prevent cross-test pollution
     jest.clearAllMocks()
   })
 
   it('returns a user if found', async () => {
     const mockGet = jest.fn().mockReturnValue(mockUser)
-
+    
     // Mock db.prepare().get() to return the mock user
     ;(db.prepare as jest.Mock).mockReturnValue({ get: mockGet })
 
@@ -49,6 +50,15 @@ describe('findUserByEmail', () => {
     ;(db.prepare as jest.Mock).mockReturnValue({ get: mockGet })
 
     const result = await findUserByEmail('unknown@example.com')
+    expect(result).toBeNull()
+  })
+
+  it('returns null and logs error on DB failure', async () => {
+    ;(db.prepare as jest.Mock).mockImplementation(() => {
+      throw new Error('SQL failed')
+    })
+
+    const result = await findUserByEmail('fail@example.com')
     expect(result).toBeNull()
   })
 
