@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
 // Internal database query
-import { findUserByEmail } from '@/lib/queries/users'
+import { findUserByEmail } from '@/lib/queries/users/users'
 
 // Fallback secret for JWT — ensure this is overridden in production via .env
 const SECRET = process.env.JWT_SECRET || 'default_secret'

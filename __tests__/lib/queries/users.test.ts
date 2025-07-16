@@ -2,7 +2,7 @@
 jest.spyOn(console, 'error').mockImplementation(() => {})
 
 // Import the function under test
-import { findUserByEmail } from '@/lib/queries/users'
+import { findUserByEmail } from '@/lib/queries/users/users'
 
 // Import the database instance (mocked below)
 import db from '@/lib/db'

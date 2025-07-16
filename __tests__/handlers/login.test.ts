@@ -3,12 +3,12 @@ import bcrypt from 'bcrypt'
 
 // Internal application modules
 import { handleLogin } from '@/lib/handlers/login'
-import { findUserByEmail } from '@/lib/queries/users'
+import { findUserByEmail } from '@/lib/queries/users/users'
 import { User } from '@/types/user' // Import User type for strong typing
 
 // Mock the bcrypt and database methods for isolated unit testing
 jest.mock('bcrypt')
-jest.mock('@/lib/queries/users')
+jest.mock('@/lib/queries/users/users')
 
 describe('handleLogin', () => {
   // Define a mock user matching the User type
