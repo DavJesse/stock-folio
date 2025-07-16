@@ -110,7 +110,7 @@ export default function SignUpForm() {
         )}
 
         {success && (
-          <p role="status" className="text-[var(--success-text)]">
+          <p role="status" className="text-[var(--success-color)]">
             Account created successfully!
           </p>
         )}
