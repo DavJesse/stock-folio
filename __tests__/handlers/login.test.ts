@@ -8,7 +8,7 @@ import { User } from '@/types/user' // Import User type for strong typing
 
 // Mock the bcrypt and database methods for isolated unit testing
 jest.mock('bcrypt')
-jest.mock('@/lib/db')
+jest.mock('@/lib/queries/users')
 
 describe('handleLogin', () => {
   // Define a mock user matching the User type
