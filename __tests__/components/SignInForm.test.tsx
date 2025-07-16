@@ -8,6 +8,13 @@ import SignInForm from '@/components/SignInForm'
 // Mock global fetch so it can be controlled in each test case
 global.fetch = jest.fn()
 
+// Mock next/navigation to avoid 'invariant expected app router to be mounted' error
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(), // simulate redirection
+  }),
+}))
+
 describe('LoginForm', () => {
   beforeEach(() => {
     // Reset all mock state before each test
