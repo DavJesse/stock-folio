@@ -1,29 +1,42 @@
-// tests/e2e/signup.spec.ts
 import { test, expect } from '@playwright/test'
+import db from '@/lib/db'
 
-// E2E test: verifies user signup flow and dashboard redirection
-test('user can sign up and see dashboard', async ({ page }) => {
-  await page.goto('/') // Navigate to homepage
+test.describe('Sign up flow', () => {
+  let testEmail = ''
 
-  // Switch to Sign Up tab if needed
-  const signUpTab = page.getByRole('button', { name: /sign up/i })
-  if (await signUpTab.isVisible()) {
-    await signUpTab.click()
-  }
+  // After each test, clean up the test user from the database
+  test.afterEach(() => {
+    if (testEmail) {
+      db.prepare('DELETE FROM users WHERE email = ?').run(testEmail)
+    }
+  })
 
-  const email = `user${Date.now()}@example.com`
-  // Fill out signup form
-  await page.fill('#email', email)
-  await page.fill('#password', 'securePass123')
-  await page.fill('#confirmPassword', 'securePass123')
+  test('user can sign up and see dashboard', async ({ page }) => {
+    // Navigate to homepage
+    await page.goto('/')
 
-  // Wait for validation to complete and button to be enabled
-  const submitButton = page.locator('button[type=submit]')
-  await expect(submitButton).toBeEnabled()
+    // Switch to Sign Up tab if not selected by default
+    const signUpTab = page.getByRole('button', { name: /sign up/i })
+    if (await signUpTab.isVisible()) {
+      await signUpTab.click()
+    }
 
-  // Submit the form
-  await submitButton.click()
+    // Generate a unique test email using timestamp
+    testEmail = `user${Date.now()}@example.com`
 
-  // Verify redirection to dashboard
-  await expect(page).toHaveURL('/dashboard')
+    // Fill out the signup form
+    await page.fill('#email', testEmail)
+    await page.fill('#password', 'securePass123')
+    await page.fill('#confirmPassword', 'securePass123')
+
+    // Wait for validation and button activation
+    const submitButton = page.locator('button[type=submit]')
+    await expect(submitButton).toBeEnabled()
+
+    // Submit the form
+    await submitButton.click()
+
+    // Expect redirection to the dashboard
+    await expect(page).toHaveURL('/dashboard')
+  })
 })

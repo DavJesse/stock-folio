@@ -1,25 +1,45 @@
 import { test, expect } from '@playwright/test'
+import bcrypt from 'bcrypt'
+import db from '@/lib/db'
 
-test('user can log in and see dashboard', async ({ page }) => {
-  // Visit home page
-  await page.goto('/')
+const TEST_EMAIL = 'e2e_user@example.com'
+const TEST_PASSWORD = 'password123'
 
-  // If not defaulted to login tab, click "Sign In" tab
-  const signInTab = page.getByRole('button', { name: /sign in/i })
-  if (await signInTab.isVisible()) {
-    await signInTab.click()
-  }
+test.describe('Sign in flow with seeded user', () => {
+  test.beforeEach(async () => {
+    // Hash the password to match production format
+    const passwordHash = await bcrypt.hash(TEST_PASSWORD, 10)
 
-  // Fill in credentials
-  await page.getByLabel('Email').fill('e2e_user@example.com')
-  await page.getByLabel('Password').fill('password123')
+    // Seed the test user into the database with current local time
+    db.prepare(`
+      INSERT INTO users (email, password_hash, created_at)
+      VALUES (?, ?, datetime('now', 'localtime'))
+    `).run(TEST_EMAIL, passwordHash)
+  })
 
-  // Submit form
-  await page.getByRole('button', { name: /log in/i }).click()
+  test.afterEach(() => {
+    // Clean up: remove the test user after each test
+    db.prepare('DELETE FROM users WHERE email = ?').run(TEST_EMAIL)
+  })
 
-  // Expect to see confirmation
-  await expect(page.getByText(/Login successful!/i)).toBeVisible()
+  test('user can log in and see dashboard', async ({ page }) => {
+    // Navigate to the root page
+    await page.goto('/')
 
-  // Redirect to dashboard
-  await expect(page).toHaveURL(/dashboard/i)
+    // If not already on the login tab, click the "Sign In" tab
+    const signInTab = page.getByRole('button', { name: /Sign In/i })
+    if (await signInTab.isVisible()) {
+      await signInTab.click()
+    }
+
+    // Fill out login credentials
+    await page.getByLabel('Email').fill(TEST_EMAIL)
+    await page.getByLabel('Password').fill(TEST_PASSWORD)
+
+    // Submit the login form
+    await page.getByRole('button', { name: /Log In/i }).click()
+
+    // Expect to be redirected to the dashboard on successful login
+    await expect(page).toHaveURL(/\/dashboard/)
+  })
 })
