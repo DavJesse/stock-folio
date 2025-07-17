@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 /**
  * Interface for the expected shape of the signup response
@@ -14,6 +15,9 @@ interface SignUpResponse {
  * It validates inputs, communicates with the backend, and provides user feedback.
  */
 export default function SignUpForm() {
+  //  Initialize router
+  const router = useRouter()
+
   // Form field states
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -86,6 +90,7 @@ export default function SignUpForm() {
           setEmail('')
           setPassword('')
           setConfirmPassword('')
+          router.push('/dashboard') // Redirect after login
         }
       } else {
         // Network or unexpected issue
