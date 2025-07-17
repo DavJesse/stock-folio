@@ -73,3 +73,64 @@ paths:
                 properties:
                   error:
                     type: string                # Generic error message (e.g., "Internal server error")
+
+  /auth/signin:
+      post:
+        summary: Authenticate a user              # Short description for API docs and UIs
+        tags: [Authentication]                    # Logical grouping for endpoints
+        requestBody:
+          required: true                          # Indicates this endpoint requires a body
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [email, password]       # Mandatory login credentials
+                properties:
+                  email:
+                    type: string                  # User's registered email address
+                  password:
+                    type: string                  # User's plaintext password (validated against hashed version)
+  
+        responses:
+          '200':
+            description: Login successful
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string                # Success message (e.g., "Login successful")
+                    token:
+                      type: string                # Authentication token (e.g., JWT or session token)
+  
+          '400':
+            description: Invalid input            # Triggered by missing or malformed credentials
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string                # Error description (e.g., "Invalid email or password")
+  
+          '401':
+            description: Unauthorized             # Triggered when credentials are incorrect
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string                # Error message (e.g., "Invalid credentials")
+  
+          '500':
+            description: Internal server error    # Catch-all for unexpected failures
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string                # Generic error message
+                      
