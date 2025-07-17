@@ -2,6 +2,16 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
+// Mock useRouter from Next.js App Router
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    refresh: jest.fn(),
+    back: jest.fn(),
+  }),
+}))
+
 // Component under test
 import SignUpForm from '@/components/SignUpForm'
 
