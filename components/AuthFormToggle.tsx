@@ -1,17 +1,28 @@
-import { useState } from 'react'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import SignInForm from './SignInForm'
 import SignUpForm from './SignUpForm'
+import Cookies from 'js-cookie'
 
 /**
- * AuthFormSwitcher toggles between SignIn and SignUp forms.
- * It manages the view state and displays appropriate forms with a toggle button.
+ * AuthFormToggle toggles between SignIn and SignUp forms.
+ * If a token is found in cookies, user is redirected to the dashboard.
  */
-export default function AuthSwitcher() {
+export default function AuthFormToggle() {
   const [isLogin, setIsLogin] = useState(true)
+  const router = useRouter()
+
+  useEffect(() => {
+    const token = Cookies.get('token')
+    if (token) {
+      router.push('/dashboard') // redirect if already authenticated
+    }
+  }, [router])
 
   return (
     <div className="max-w-sm h-100 mx-auto mt-10 p-6 rounded-lg shadow-lg bg-white/5 backdrop-blur-md border border-white/10 text-white">
-      
       {/* Tabs */}
       <div className="flex border-b border-white/20 mb-6">
         <button
