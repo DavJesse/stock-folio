@@ -1,23 +1,25 @@
-// tests/e2e/login.spec.ts
 import { test, expect } from '@playwright/test'
 
 test('user can log in and see dashboard', async ({ page }) => {
-  // Navigate to the home page
+  // Visit home page
   await page.goto('/')
 
-  // Click on the "Log In" button/link if needed
-  await page.getByText(/log in/i).click()
+  // If not defaulted to login tab, click "Sign In" tab
+  const signInTab = page.getByRole('button', { name: /sign in/i })
+  if (await signInTab.isVisible()) {
+    await signInTab.click()
+  }
 
-  // Fill out the login form
-  await page.fill('#email', 'e2e_user@example.com')
-  await page.fill('#password', 'password123')
+  // Fill in credentials
+  await page.getByLabel('Email').fill('e2e_user@example.com')
+  await page.getByLabel('Password').fill('password123')
 
-  // Submit the form
+  // Submit form
   await page.getByRole('button', { name: /log in/i }).click()
 
-  // Expect success message or redirection
-  await expect(page.getByText(/login successful/i)).toBeVisible()
+  // Expect to see confirmation
+  await expect(page.getByText(/Login successful!/i)).toBeVisible()
 
-  // Optional: Check dashboard or protected content
-  // await expect(page.getByText(/welcome|dashboard/i)).toBeVisible()
+  // Redirect to dashboard
+  await expect(page).toHaveURL(/dashboard/i)
 })
