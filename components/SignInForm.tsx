@@ -145,6 +145,7 @@ export default function SignInForm() {
         <div className="flex justify-end">
           <button
             type="submit"
+            aria-label="submit-signin"
             className={`
               bg-[var(--button-primary)]
               text-white

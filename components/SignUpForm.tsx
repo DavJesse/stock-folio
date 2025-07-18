@@ -172,6 +172,7 @@ export default function SignUpForm() {
         <div className="flex justify-end">
           <button
             type="submit"
+            aria-label="submit-signup"
             className={`
               bg-[var(--button-primary)]
               text-white
