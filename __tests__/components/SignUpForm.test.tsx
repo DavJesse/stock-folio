@@ -30,7 +30,7 @@ describe('SignUpForm', () => {
     expect(screen.getByLabelText('Email:')).toBeInTheDocument()
     expect(screen.getByLabelText('Password:')).toBeInTheDocument()
     expect(screen.getByLabelText('Confirm Password:')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /submit-signup/i })).toBeInTheDocument()
   })
 
   it('shows email format error only when email is invalid', async () => {
@@ -72,7 +72,7 @@ describe('SignUpForm', () => {
     fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'password123' } })
     fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'password123' } })
 
-    fireEvent.click(screen.getByRole('button', { name: /sign up/i }))
+    fireEvent.click(screen.getByRole('button', { name: /submit-signup/i }))
 
     expect(await screen.findByText(/invalid server response/i)).toBeInTheDocument()
   })
@@ -97,7 +97,7 @@ describe('SignUpForm', () => {
     fireEvent.change(screen.getByLabelText('Password:'), { target: { value: '' } })
     fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: '' } })
 
-    expect(screen.getByRole('button', { name: /sign up/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /submit-signup/i })).toBeDisabled()
   })
 
   it('submits form with valid input and shows success message', async () => {
@@ -113,7 +113,7 @@ describe('SignUpForm', () => {
     fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'securePass123' } })
     fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'securePass123' } })
 
-    fireEvent.click(screen.getByRole('button', { name: /sign up/i }))
+    fireEvent.click(screen.getByRole('button', { name: /submit-signup/i }))
 
     expect(await screen.findByText(/account created successfully/i)).toBeInTheDocument()
   })
@@ -144,7 +144,7 @@ describe('SignUpForm', () => {
     fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'validPass123' } })
     fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'validPass123' } })
 
-    fireEvent.click(screen.getByRole('button', { name: /sign up/i }))
+    fireEvent.click(screen.getByRole('button', { name: /submit-signup/i }))
 
     expect(await screen.findByText(/account created successfully/i)).toBeInTheDocument()
 
@@ -167,7 +167,7 @@ describe('SignUpForm', () => {
     fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'securePass123' } })
     fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'securePass123' } })
 
-    fireEvent.click(screen.getByRole('button', { name: /sign up/i }))
+    fireEvent.click(screen.getByRole('button', { name: /submit-signup/i }))
 
     expect(await screen.findByText(/user already exists/i)).toBeInTheDocument()
   })
@@ -186,10 +186,12 @@ describe('SignUpForm', () => {
     fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'loading123' } })
     fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'loading123' } })
 
-    fireEvent.click(screen.getByRole('button', { name: /sign up/i }))
+    fireEvent.click(screen.getByRole('button', { name: /submit-signup/i }))
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /creating account/i })).toBeDisabled()
+      const button = screen.getByRole('button', { name: /submit-signup/i })
+      expect(button).toHaveTextContent(/creating account/i)
+      expect(button).toBeDisabled()
     })
 
     resolveFetch!() // Finish the fetch
