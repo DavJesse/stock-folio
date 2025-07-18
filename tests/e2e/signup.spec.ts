@@ -30,8 +30,8 @@ test.describe('Sign up flow', () => {
     await page.fill('#confirmPassword', 'securePass123')
 
     // Wait for validation and button activation
-    const submitButton = page.locator('button[type=submit]')
-    await expect(submitButton).toBeEnabled()
+   const submitButton = page.getByLabel('submit-signup')
+   await expect(submitButton).toBeEnabled()
 
     // Submit the form
     await submitButton.click()
