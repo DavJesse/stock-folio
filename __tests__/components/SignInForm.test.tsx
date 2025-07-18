@@ -26,7 +26,7 @@ describe('LoginForm', () => {
 
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /submit-signin/i })).toBeInTheDocument()
   })
 
   it('disables submit button when form is invalid', () => {
@@ -37,7 +37,7 @@ describe('LoginForm', () => {
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: '' } })
 
     // Expect button to be disabled due to form validation
-    expect(screen.getByRole('button', { name: /log in/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /submit-signin/i })).toBeDisabled()
   })
 
   it('shows email format error if email is invalid', async () => {
@@ -100,7 +100,7 @@ describe('LoginForm', () => {
     fireEvent.change(screen.getByLabelText(/password/i), {
       target: { value: 'wrongpass' },
     })
-    fireEvent.click(screen.getByRole('button', { name: /log in/i }))
+    fireEvent.click(screen.getByRole('button', { name: /submit-signin/i }))
 
     expect(await screen.findByText(/invalid credentials/i)).toBeInTheDocument()
   })
@@ -124,7 +124,7 @@ describe('LoginForm', () => {
     fireEvent.change(screen.getByLabelText(/password/i), {
       target: { value: 'correctpass' },
     })
-    fireEvent.click(screen.getByRole('button', { name: /log in/i }))
+    fireEvent.click(screen.getByRole('button', { name: /submit-signin/i }))
 
     expect(await screen.findByText(/login successful/i)).toBeInTheDocument()
   })
@@ -147,7 +147,7 @@ describe('LoginForm', () => {
     fireEvent.change(screen.getByLabelText(/password/i), {
       target: { value: 'correctpass' },
     })
-    fireEvent.click(screen.getByRole('button', { name: /log in/i }))
+    fireEvent.click(screen.getByRole('button', { name: /submit-signin/i }))
 
     expect(await screen.findByText(/invalid server response/i)).toBeInTheDocument()
   })
@@ -167,7 +167,7 @@ describe('LoginForm', () => {
     fireEvent.change(screen.getByLabelText(/password/i), {
       target: { value: 'correctpass' },
     })
-    fireEvent.click(screen.getByRole('button', { name: /log in/i }))
+    fireEvent.click(screen.getByRole('button', { name: /submit-signin/i }))
 
     expect(await screen.findByText(/failed to connect/i)).toBeInTheDocument()
 
