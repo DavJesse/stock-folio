@@ -28,16 +28,19 @@ test.describe('Sign in flow with seeded user', () => {
 
     // If not already on the login tab, click the "Sign In" tab
     const signInTab = page.getByRole('button', { name: /Sign In/i })
-    if (await signInTab.isVisible()) {
-      await signInTab.click()
-    }
+    await signInTab.click()
+
+    // Wait for the login form to be ready
+    await page.getByLabel('Email').waitFor()
 
     // Fill out login credentials
     await page.getByLabel('Email').fill(TEST_EMAIL)
     await page.getByLabel('Password').fill(TEST_PASSWORD)
 
     // Submit the login form
-    await page.getByRole('button', { name: /Log In/i }).click()
+    const loginButton = page.getByLabel('submit-signin')
+    await expect(loginButton).toBeEnabled()
+    await loginButton.click()
 
     // Expect to be redirected to the dashboard on successful login
     await expect(page).toHaveURL(/\/dashboard/)
