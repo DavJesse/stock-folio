@@ -57,8 +57,7 @@ export default function SignInForm() {
     }
 
     setLoading(true)
-    console.log('Loading:', loading)
-    console.log('Form is valid:', formIsValid)
+    
     try {
       const response = await fetch('/api/auth/signin', {
         method: 'POST',
