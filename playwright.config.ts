@@ -8,6 +8,8 @@ export default defineConfig({
     timeout: 30 * 1000,
     // Number of retries per test on failure
     retries: 1,
+    // Run tests serially to avoid DB state conflicts (recommended for shared DB)
+    workers: 1,
     use: {
         // Base URL for all tests
         baseURL: 'http://localhost:3000',
