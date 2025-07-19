@@ -57,7 +57,8 @@ export default function SignInForm() {
     }
 
     setLoading(true)
-
+    console.log('Loading:', loading)
+    console.log('Form is valid:', formIsValid)
     try {
       const response = await fetch('/api/auth/signin', {
         method: 'POST',
@@ -146,19 +147,7 @@ export default function SignInForm() {
           <button
             type="submit"
             aria-label="submit-signin"
-            className={`
-              bg-[var(--button-primary)]
-              text-white
-              px-5
-              py-1
-              rounded
-              w-[50%]
-              disabled:bg-[var(--button-disabled)]
-              disabled:cursor-not-allowed
-              hover:scale-105
-              hover:pointer
-              transition-colors duration-200
-            `}
+            className="bg-[var(--button-primary)] text-white px-5 py-1 rounded w-[50%] disabled:bg-[var(--button-disabled)] disabled:cursor-not-allowed hover:scale-105 hover:pointer transition-colors duration-200"
             disabled={loading || !formIsValid}
           >
             {loading ? 'Logging In...' : 'Log In'}
