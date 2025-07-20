@@ -1,12 +1,20 @@
 // External dependencies
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
+import db from '@/lib/db' // Import the SQLite database connection
+import bcrypt from 'bcrypt' // Import bcrypt for password hashing
 
 // Internal component under test
 import SignInForm from '@/components/SignInForm'
 
-// Mock global fetch so it can be controlled in each test case
-global.fetch = jest.fn()
+// Helper to clear all cookies after each test
+function clearCookies() {
+  document.cookie.split(';').forEach(cookie => {
+    const eqPos = cookie.indexOf('=')
+    const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie
+    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT'
+  })
+}
 
 // Mock next/navigation to avoid 'invariant expected app router to be mounted' error
 jest.mock('next/navigation', () => ({
@@ -16,14 +24,54 @@ jest.mock('next/navigation', () => ({
 }))
 
 describe('LoginForm', () => {
-  beforeEach(() => {
-    // Reset all mock state before each test
+  // Use a unique email for each test run to avoid collisions
+  let TEST_EMAIL: string;
+  const TEST_PASSWORD = 'testpassword123';
+  let TEST_PASSWORD_HASH: string;
+
+  beforeEach(async () => {
     jest.resetAllMocks()
+    clearCookies()
+    // Generate a unique email for this test run
+    TEST_EMAIL = `testuser_${Date.now()}@example.com`;
+    // Hash the test password
+    TEST_PASSWORD_HASH = await bcrypt.hash(TEST_PASSWORD, 10);
+    // Insert the test user into the database
+    db.prepare(
+      'INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, datetime(\'now\'))'
+    ).run(TEST_EMAIL, TEST_PASSWORD_HASH);
+    // Robust fetch mock for all tests
+    global.fetch = jest.fn((url: string) => {
+      if (url === '/api/auth/csrf-token') {
+        document.cookie = 'csrfToken=test-csrf-token'
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ csrfToken: 'test-csrf-token' }),
+        })
+      }
+      if (url === '/api/auth/signin') {
+        // Default: valid login
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ token: 'fake-token', message: 'Login successful' }),
+        })
+      }
+      return Promise.resolve({
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      })
+    }) as jest.Mock
+  })
+
+  afterEach(() => {
+    // Remove the test user from the database after each test
+    db.prepare('DELETE FROM users WHERE email = ?').run(TEST_EMAIL);
   })
 
   it('renders the login form fields and button', () => {
     render(<SignInForm />)
-
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /submit-signin/i })).toBeInTheDocument()
@@ -31,146 +79,163 @@ describe('LoginForm', () => {
 
   it('disables submit button when form is invalid', () => {
     render(<SignInForm />)
-
-    // Submit empty form
     fireEvent.change(screen.getByLabelText(/email/i), { target: { value: '' } })
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: '' } })
-
-    // Expect button to be disabled due to form validation
     expect(screen.getByRole('button', { name: /submit-signin/i })).toBeDisabled()
   })
 
   it('shows email format error if email is invalid', async () => {
     render(<SignInForm />)
-
     fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'bademail' } })
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'password123' } })
-
-    // Submit form with invalid email
     fireEvent.submit(screen.getByRole('form', { name: /login-form/i }))
-
     expect(await screen.findByText(/valid email/i)).toBeInTheDocument()
   })
 
   it('shows error if only email is provided', async () => {
     render(<SignInForm />)
-
     fireEvent.change(screen.getByLabelText(/email/i), {
-      target: { value: 'user@example.com' },
+      target: { value: TEST_EMAIL },
     })
     fireEvent.change(screen.getByLabelText(/password/i), {
       target: { value: '' },
     })
-
-    // Submit with missing password
     fireEvent.submit(screen.getByRole('form', { name: /login-form/i }))
-
     expect(await screen.findByText(/required/i)).toBeInTheDocument()
   })
 
   it('shows error if only password is provided', async () => {
     render(<SignInForm />)
-
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: '' },
     })
     fireEvent.change(screen.getByLabelText(/password/i), {
-      target: { value: 'password123' },
+      target: { value: TEST_PASSWORD },
     })
-
-    // Submit with missing email
     fireEvent.submit(screen.getByRole('form', { name: /login-form/i }))
-
     expect(await screen.findByText(/required/i)).toBeInTheDocument()
   })
 
   it('shows error on failed login (401)', async () => {
-    // Simulate backend returning unauthorized response
-    ;(fetch as jest.Mock).mockResolvedValueOnce({
-      ok: false,
-      status: 401,
-      json: async () => ({ message: 'Invalid credentials' }),
-    })
-
+    // Override fetch for this test to simulate 401
+    (global.fetch as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/api/auth/csrf-token') {
+        document.cookie = 'csrfToken=test-csrf-token'
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ csrfToken: 'test-csrf-token' }),
+        })
+      }
+      if (url === '/api/auth/signin') {
+        return Promise.resolve({
+          ok: false,
+          status: 401,
+          json: async () => ({ message: 'Invalid credentials' }),
+        })
+      }
+      return Promise.resolve({
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      })
+    });
     render(<SignInForm />)
-
     fireEvent.change(screen.getByLabelText(/email/i), {
-      target: { value: 'user@example.com' },
+      target: { value: TEST_EMAIL },
     })
     fireEvent.change(screen.getByLabelText(/password/i), {
       target: { value: 'wrongpass' },
     })
     fireEvent.click(screen.getByRole('button', { name: /submit-signin/i }))
-
     expect(await screen.findByText(/invalid credentials/i)).toBeInTheDocument()
   })
 
   it('shows success message on successful login', async () => {
-    // Simulate successful login response from backend
-    ;(fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        token: 'fake-token',
-        message: 'Login successful',
-      }),
+    (global.fetch as jest.Mock).mockImplementationOnce((url: string) => {
+      if (url === '/api/auth/csrf-token') {
+        document.cookie = 'csrfToken=test-csrf-token'
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ csrfToken: 'test-csrf-token' }),
+        })
+      }
+      if (url === '/api/auth/signin') {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            token: 'fake-token',
+            message: 'Login successful',
+          }),
+        })
+      }
+      return Promise.resolve({
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      })
     })
-
     render(<SignInForm />)
-
-    fireEvent.change(screen.getByLabelText(/email/i), {
-      target: { value: 'user@example.com' },
-    })
-    fireEvent.change(screen.getByLabelText(/password/i), {
-      target: { value: 'correctpass' },
-    })
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: TEST_EMAIL } })
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: TEST_PASSWORD } })
     fireEvent.click(screen.getByRole('button', { name: /submit-signin/i }))
-
     expect(await screen.findByText(/login successful/i)).toBeInTheDocument()
   })
 
   it('shows fallback error if JSON parsing fails', async () => {
-    // Simulate invalid JSON response body from server
-    ;(fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => {
-        throw new Error('Parse error')
-      },
+    (global.fetch as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/api/auth/csrf-token') {
+        document.cookie = 'csrfToken=test-csrf-token'
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ csrfToken: 'test-csrf-token' }),
+        })
+      }
+      if (url === '/api/auth/signin') {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => { throw new Error('Parse error') },
+        })
+      }
+      return Promise.resolve({
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      })
     })
-
     render(<SignInForm />)
-
-    fireEvent.change(screen.getByLabelText(/email/i), {
-      target: { value: 'user@example.com' },
-    })
-    fireEvent.change(screen.getByLabelText(/password/i), {
-      target: { value: 'correctpass' },
-    })
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: TEST_EMAIL } })
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: TEST_PASSWORD } })
     fireEvent.click(screen.getByRole('button', { name: /submit-signin/i }))
-
     expect(await screen.findByText(/invalid server response/i)).toBeInTheDocument()
   })
 
   it('shows fallback message on fetch failure', async () => {
-    // Suppress console.error for clean test output
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-
-    // Simulate network failure
-    ;(fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'))
-
+    const consoleSpy = jest.spyOn(console, 'error');
+    consoleSpy.mockImplementation(() => {});
+    (global.fetch as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/api/auth/csrf-token') {
+        document.cookie = 'csrfToken=test-csrf-token'
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ csrfToken: 'test-csrf-token' }),
+        });
+      }
+      if (url === '/api/auth/signin') {
+        return Promise.reject(new Error('Network error'));
+      }
+      return Promise.resolve({
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      });
+    });
     render(<SignInForm />)
-
-    fireEvent.change(screen.getByLabelText(/email/i), {
-      target: { value: 'user@example.com' },
-    })
-    fireEvent.change(screen.getByLabelText(/password/i), {
-      target: { value: 'correctpass' },
-    })
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: TEST_EMAIL } })
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: TEST_PASSWORD } })
     fireEvent.click(screen.getByRole('button', { name: /submit-signin/i }))
-
     expect(await screen.findByText(/failed to connect/i)).toBeInTheDocument()
-
-    consoleSpy.mockRestore()
+    consoleSpy.mockRestore();
   })
 })
