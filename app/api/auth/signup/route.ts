@@ -1,6 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { handleSignup } from '@/lib/handlers/signup';
+import { validateCsrf } from '@/lib/security/validate-csrf';
 
 /**
  * Handles user signup requests.
@@ -8,6 +9,10 @@ import { handleSignup } from '@/lib/handlers/signup';
  * Delegate signup logic to handleSignup.
  */
 export async function POST(req: NextRequest) {
+  if (!(await validateCsrf(req))) {
+      return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 })
+  }
+
   try {
     const data = await req.json();
     const { status, body } = await handleSignup(data);
