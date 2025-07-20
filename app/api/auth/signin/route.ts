@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { handleLogin } from '@/lib/handlers/login'
+import { validateCsrf } from '@/lib/security/validate-csrf'
 
 /**
  * POST /api/login
  * Handles user login and sets HTTP-only auth token cookie.
  */
 export async function POST(req: NextRequest) {
+  if (!(await validateCsrf(req))) {
+    return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 })
+  }
+  
   try {
     // Extract credentials from request body
     const { email, password } = await req.json()
