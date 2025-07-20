@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 /**
@@ -27,6 +27,23 @@ export default function SignUpForm() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+
+  const [csrfToken, setCsrfToken] = useState<string | null>(null)
+
+  // Fetch CSRF token on mount
+  useEffect(() => {
+    const fetchCsrf = async () => {
+      try {
+        const res = await fetch('/api/auth/csrf-token')
+        const { csrfToken } = await res.json()
+        setCsrfToken(csrfToken)
+      } catch (err) {
+        console.error('Failed to fetch CSRF token:', err)
+      }
+    }
+
+    fetchCsrf()
+  }, [])
 
   // Form validation status — true only if all criteria are met
   const formIsValid =
@@ -63,12 +80,21 @@ export default function SignUpForm() {
       return
     }
 
+    // CSRF token check (keep separate!)
+    if (!csrfToken) {
+      setError('CSRF token missing. Please refresh and try again.')
+      return
+    }
+
     setLoading(true)
 
     try {
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken,
+        },
         body: JSON.stringify({ email, password }),
       })
 
