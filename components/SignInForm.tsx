@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Cookies from 'js-cookie';
 
 /**
  * Interface for the expected shape of the login response
@@ -27,6 +28,10 @@ export default function SignInForm() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/auth/csrf-token');
+  }, []);
 
   // Form validation status
   const formIsValid =
@@ -59,9 +64,13 @@ export default function SignInForm() {
     setLoading(true)
     
     try {
+      const csrfToken = Cookies.get('csrfToken');
       const response = await fetch('/api/auth/signin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken || '',
+         },
         body: JSON.stringify({ email, password }),
       })
 
@@ -72,11 +81,12 @@ export default function SignInForm() {
           data = await response.json()
         } catch {
           setError('Invalid server response.')
-          return
+          return;
         }
 
         if (!response.ok) {
           setError(data.message || 'Something went wrong.')
+          return;
         } else {
           setSuccess(true)
           setEmail('')
