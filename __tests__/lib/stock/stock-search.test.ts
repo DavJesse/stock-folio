@@ -1,10 +1,11 @@
+// --- Imports ---
 import { stockSearch } from '@/lib/stock/stock-search'
 import { SymbolLookupResponse } from '@/types/stock'
 import { __cache } from '@/lib/stock/stock-search'
 
 global.fetch = jest.fn()
 
-// Mock response returned by the external API
+// --- Mock Data ---
 const mockData: SymbolLookupResponse = {
   count: 2,
   result: [
@@ -25,18 +26,20 @@ const mockData: SymbolLookupResponse = {
   ],
 }
 
+// --- Test Suite ---
 describe('stockSearch', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     __cache.clear()
   })
 
-  it('returns null for empty query', async () => {
+  it('returns an empty array for empty query', async () => {
     const result = await stockSearch('   ')
-    expect(result).toBeNull()
+    expect(result).toEqual([])
   })
 
   it('returns a match by symbol', async () => {
+    // Mock a successful API response
     ;(fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: async () => mockData,
@@ -44,12 +47,20 @@ describe('stockSearch', () => {
 
     const result = await stockSearch('AAPL')
 
-    expect(result).toEqual({
-      symbol: 'AAPL',
-      name: 'Apple Inc.',
-      type: 'Common Stock',
-      region: 'XNAS',
-    })
+    expect(result).toEqual([
+      {
+        symbol: 'AAPL',
+        name: 'Apple Inc.',
+        type: 'Common Stock',
+        region: 'XNAS',
+      },
+      {
+        symbol: 'MSFT',
+        name: 'Microsoft Corporation',
+        type: 'Common Stock',
+        region: 'XNAS',
+      },
+    ])
   })
 
   it('returns a match by company name', async () => {
@@ -60,16 +71,24 @@ describe('stockSearch', () => {
 
     const result = await stockSearch('microsoft')
 
-    expect(result).toEqual({
-      symbol: 'MSFT',
-      name: 'Microsoft Corporation',
-      type: 'Common Stock',
-      region: 'XNAS',
-    })
+    expect(result).toEqual([
+      {
+        symbol: 'AAPL',
+        name: 'Apple Inc.',
+        type: 'Common Stock',
+        region: 'XNAS',
+      },
+      {
+        symbol: 'MSFT',
+        name: 'Microsoft Corporation',
+        type: 'Common Stock',
+        region: 'XNAS',
+      },
+    ])
   })
 
-  it('returns null when no match is found', async () => {
-    const emptyData = { count: 0, result: [] }
+  it('returns an empty array when no match is found', async () => {
+    const emptyData: SymbolLookupResponse = { count: 0, result: [] }
 
     ;(fetch as jest.Mock).mockResolvedValue({
       ok: true,
@@ -77,19 +96,19 @@ describe('stockSearch', () => {
     })
 
     const result = await stockSearch('nonexistent')
-    expect(result).toBeNull()
+    expect(result).toEqual([])
   })
 
-  it('returns null and logs an error if API call fails', async () => {
+  it('returns an empty array and logs an error if API call fails', async () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
     ;(fetch as jest.Mock).mockRejectedValue(new Error('API failure'))
 
     const result = await stockSearch('AAPL')
 
-    expect(result).toBeNull()
+    expect(result).toEqual([])
     expect(consoleSpy).toHaveBeenCalledWith(
-      'Stock search failed:',
+      'Stock search error:',
       expect.any(Error)
     )
 
