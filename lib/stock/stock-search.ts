@@ -1,74 +1,59 @@
-import { SearchResult, SymbolLookupResponse } from '@/types/stock'
-
-const BASE_URL = 'https://finnhub.io/api/v1'
-const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY as string
-
-// In-memory cache for the current server session
-const cache = new Map<string, SearchResult | null>()
+import { SymbolLookupResponse } from '@/types/stock'
 
 /**
- * Fetches and returns a normalized stock search result based on user query.
- * Falls back to fuzzy matching by company name if exact symbol is not found.
+ * In-memory cache to store search results and avoid redundant API calls.
  */
-export async function stockSearch(query: string): Promise<SearchResult | null> {
-  const trimmedQuery = query.trim()
-  if (!trimmedQuery) return null
+export const __cache: Map<string, SearchResult[]> = new Map()
 
-  const normalizedQuery = trimmedQuery.toLowerCase()
+/**
+ * Represents a single search result from the stock lookup API.
+ */
+export type SearchResult = {
+  symbol: string
+  name: string
+  type: string
+  region: string
+}
+
+/**
+ * Performs a stock symbol or name lookup using the Finnhub API.
+ *
+ * @param query - The raw input string to search for.
+ * @returns A list of matching stock results or an empty array if none found or on error.
+ */
+export async function stockSearch(query: string): Promise<SearchResult[]> {
+  const trimmedQuery = query.trim().toUpperCase()
+
+  // Return empty result for blank input
+  if (!trimmedQuery) return []
 
   // Return cached result if available
-  if (cache.has(normalizedQuery)) {
-    return cache.get(normalizedQuery) ?? null
+  if (__cache.has(trimmedQuery)) {
+    return __cache.get(trimmedQuery)!
   }
 
-  const url = `${BASE_URL}/search?q=${encodeURIComponent(trimmedQuery)}&token=${FINNHUB_API_KEY}`
+  const apiKey = process.env.NEXT_PUBLIC_FINNHUB_API_KEY
+  const url = `https://finnhub.io/api/v1/search?q=${trimmedQuery}&token=${apiKey}`
 
   try {
     const res = await fetch(url)
-    if (!res.ok) throw new Error(`Finnhub API returned ${res.status}`)
+    if (!res.ok) throw new Error('Network response was not ok')
 
     const data: SymbolLookupResponse = await res.json()
 
-    // Attempt exact match by symbol
-    const symbolMatch = data.result.find(
-      (stock) => stock.symbol.toLowerCase() === normalizedQuery
-    )
-    if (symbolMatch) {
-      const result = formatResult(symbolMatch)
-      cache.set(normalizedQuery, result)
-      return result
-    }
+    // Normalize the API result into a simplified structure
+    const formatted: SearchResult[] = data.result.map((item) => ({
+      symbol: item.symbol,
+      name: item.description,
+      type: item.type,
+      region: item.mic,
+    }))
 
-    // Attempt partial match by company name
-    const nameMatch = data.result.find(
-      (stock) => stock.description.toLowerCase().includes(normalizedQuery)
-    )
-    if (nameMatch) {
-      const result = formatResult(nameMatch)
-      cache.set(normalizedQuery, result)
-      return result
-    }
-
-    // No match found — cache and return null
-    cache.set(normalizedQuery, null)
-    return null
+    // Cache and return the result
+    __cache.set(trimmedQuery, formatted)
+    return formatted
   } catch (err) {
-    console.error('Stock search failed:', err)
-    return null
+    console.error('Stock search error:', err)
+    return []
   }
 }
-
-/**
- * Maps API result to internal search result format.
- */
-function formatResult(item: SymbolLookupResponse['result'][number]): SearchResult {
-  return {
-    symbol: item.symbol,         // e.g. 'AAPL'
-    name: item.description,      // e.g. 'Apple Inc'
-    type: item.type,             // e.g. 'Common Stock'
-    region: item.mic,            // e.g. 'XNAS'
-  }
-}
-
-// Export cache for testing or debugging
-export const __cache = cache
