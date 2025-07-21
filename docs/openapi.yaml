@@ -159,3 +159,37 @@ paths:
                   error:
                     type: string                # Generic error message (e.g., "Internal server error")
                     
+  /auth/csrf-token:
+    get:
+      summary: Retrieve CSRF token
+      tags: [Security]
+      description: >
+        Generates a CSRF token and sets it in a cookie.
+        The token must be sent in the `x-csrf-token` header for all protected POST requests.
+      responses:
+        '200':
+          description: CSRF token generated
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Cookie containing the CSRF token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  csrfToken:
+                    type: string
+                    description: CSRF token to be echoed back in `x-csrf-token` header
+
+        '500':
+          description: Failed to generate CSRF token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    
