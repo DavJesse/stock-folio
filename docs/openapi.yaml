@@ -193,3 +193,66 @@ paths:
                   error:
                     type: string
                     
+  /search:
+    get:
+      summary: Search for stock symbols            # Short description for API docs and UIs
+      tags: [Stocks]                               # Logical grouping for endpoints
+      parameters:
+        - name: q
+          in: query
+          required: true                           # Query parameter is required
+          description: Stock symbol or name query  # Description for documentation
+          schema:
+            type: string                           # Expected type of query parameter
+
+      responses:
+        '200':
+          description: Search results returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer                  # Total number of matching results (if applicable)
+                    example: 1
+                  result:
+                    type: array                    # List of matching stocks
+                    items:
+                      type: object
+                      properties:
+                        symbol:
+                          type: string             # Stock ticker symbol
+                          example: AAPL
+                        name:
+                          type: string             # Company name
+                          example: Apple Inc.
+                        type:
+                          type: string             # Instrument type (e.g., "Equity")
+                          example: Equity
+                        region:
+                          type: string             # Market region (e.g., "US")
+                          example: US
+                        description:
+                          type: string             # Description or summary
+                          example: Apple Inc. (Equity)
+
+        '400':
+          description: Missing search query        # Triggered when query is not provided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string                   # Error message (e.g., "Missing search query")
+
+        '500':
+          description: Server error or API key issue # Catch-all for unexpected failures
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string                   # Error description (e.g., "Internal server error")
