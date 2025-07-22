@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ReactNode } from 'react'
+import StockSearchBar from '@/components/SearchBar'
 
 // Icons
 import {
@@ -126,6 +127,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content area */}
       <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto w-full">
+        <StockSearchBar />
         {children}
       </main>
     </div>
