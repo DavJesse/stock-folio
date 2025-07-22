@@ -1,5 +1,3 @@
-import { SymbolLookupResponse } from '@/types/stock'
-
 /**
  * In-memory cache to store search results and avoid redundant API calls.
  */
@@ -13,47 +11,25 @@ export type SearchResult = {
   name: string
   type: string
   region: string
+  description: string
 }
 
 /**
- * Performs a stock symbol or name lookup using the Finnhub API.
+ * Performs a stock search by querying the backend API route.
  *
- * @param query - The raw input string to search for.
- * @returns A list of matching stock results or an empty array if none found or on error.
+ * @param query - The search string entered by the user.
+ * @returns A promise resolving to an array of search results.
+ * @throws If the request fails or returns a non-OK response.
  */
 export async function stockSearch(query: string): Promise<SearchResult[]> {
-  const trimmedQuery = query.trim().toUpperCase()
+  if (!query.trim()) return []
 
-  // Return empty result for blank input
-  if (!trimmedQuery) return []
-
-  // Return cached result if available
-  if (__cache.has(trimmedQuery)) {
-    return __cache.get(trimmedQuery)!
+  const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
+  
+  if (!res.ok) {
+    throw new Error('Failed to fetch stock data')
   }
 
-  const apiKey = process.env.NEXT_PUBLIC_FINNHUB_API_KEY
-  const url = `https://finnhub.io/api/v1/search?q=${trimmedQuery}&token=${apiKey}`
-
-  try {
-    const res = await fetch(url)
-    if (!res.ok) throw new Error('Network response was not ok')
-
-    const data: SymbolLookupResponse = await res.json()
-
-    // Normalize the API result into a simplified structure
-    const formatted: SearchResult[] = data.result.map((item) => ({
-      symbol: item.symbol,
-      name: item.description,
-      type: item.type,
-      region: item.mic,
-    }))
-
-    // Cache and return the result
-    __cache.set(trimmedQuery, formatted)
-    return formatted
-  } catch (err) {
-    console.error('Stock search error:', err)
-    return []
-  }
+  const data = await res.json()
+  return data.result || []
 }
