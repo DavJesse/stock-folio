@@ -1,10 +1,14 @@
-import { useCallback, useState } from 'react'
-import { SearchResult } from '@/types/stock'
-import { stockSearch } from '@/lib/stock/stock-search'
+'use client'
+
+import { useState, useMemo } from 'react'
+import {
+  SearchResult,
+  createDebouncedStockSearch,
+} from '@/lib/stock/create-debounced-stock-search'
 
 /**
- * Custom hook to handle stock search logic.
- * Manages state for search results, loading status, and error messages.
+ * Custom hook for searching stock symbols with debounced input.
+ * Returns search results, loading state, error message, and the search function.
  */
 export function useSearchStocks() {
   const [results, setResults] = useState<SearchResult[]>([])
@@ -12,31 +16,45 @@ export function useSearchStocks() {
   const [error, setError] = useState<string | null>(null)
 
   /**
-   * Performs a stock search based on the query string.
-   * Trims input, handles loading state, and catches any potential errors.
+   * Memoized debounced search function to prevent recreation on re-renders.
+   * Automatically updates loading and error state based on the response.
    */
-  const search = useCallback(async (query: string) => {
-    const trimmed = query.trim()
+  const debouncedSearch = useMemo(
+    () =>
+      createDebouncedStockSearch(
+        (res) => {
+          setResults(res)
+          setLoading(false)
+        },
+        (err) => {
+          setError(err)
+          setLoading(false)
+        }
+      ),
+    []
+  )
 
-    // Skip search if query is empty after trimming
-    if (!trimmed) {
+  /**
+   * Call this function to trigger a search for the given query.
+   * It ignores empty or whitespace-only input.
+   */
+  function search(query: string) {
+    if (!query.trim()) {
       setResults([])
+      setLoading(false)
+      setError(null)
       return
     }
 
     setLoading(true)
     setError(null)
+    debouncedSearch(query)
+  }
 
-    try {
-      const stocks = await stockSearch(trimmed)
-      setResults(stocks)
-    } catch (err) {
-      console.error('Search error:', err)
-      setError('Failed to fetch search results')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  return { results, loading, error, search }
+  return {
+    results,
+    loading,
+    error,
+    search,
+  }
 }
