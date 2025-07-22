@@ -50,15 +50,17 @@ describe('stockSearch', () => {
     expect(result).toEqual([
       {
         symbol: 'AAPL',
-        name: 'Apple Inc.',
+        description: 'Apple Inc.',
+        displaySymbol: 'AAPL',
         type: 'Common Stock',
-        region: 'XNAS',
+        mic: 'XNAS',
       },
       {
         symbol: 'MSFT',
-        name: 'Microsoft Corporation',
+        description: 'Microsoft Corporation',
+        displaySymbol: 'MSFT',
         type: 'Common Stock',
-        region: 'XNAS',
+        mic: 'XNAS',
       },
     ])
   })
@@ -74,15 +76,17 @@ describe('stockSearch', () => {
     expect(result).toEqual([
       {
         symbol: 'AAPL',
-        name: 'Apple Inc.',
+        description: 'Apple Inc.',
+        displaySymbol: 'AAPL',
         type: 'Common Stock',
-        region: 'XNAS',
+        mic: 'XNAS',
       },
       {
         symbol: 'MSFT',
-        name: 'Microsoft Corporation',
+        description: 'Microsoft Corporation',
+        displaySymbol: 'MSFT',
         type: 'Common Stock',
-        region: 'XNAS',
+        mic: 'XNAS',
       },
     ])
   })
@@ -99,19 +103,9 @@ describe('stockSearch', () => {
     expect(result).toEqual([])
   })
 
-  it('returns an empty array and logs an error if API call fails', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+  it('throws an error if API call fails', async () => {
+  ;(fetch as jest.Mock).mockRejectedValue(new Error('API failure'))
 
-    ;(fetch as jest.Mock).mockRejectedValue(new Error('API failure'))
-
-    const result = await stockSearch('AAPL')
-
-    expect(result).toEqual([])
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'Stock search error:',
-      expect.any(Error)
-    )
-
-    consoleSpy.mockRestore()
-  })
+  await expect(stockSearch('AAPL')).rejects.toThrow('API failure')
+})
 })
