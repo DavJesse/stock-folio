@@ -1,0 +1,9 @@
+erDiagram
+    %% Accounts table
+    accounts {
+       INTEGER id PK
+       INTEGER portfolio_id FK "REFERENCES portfolios(id)"
+       TEXT account_type
+       REAL balance
+       DATETIME created_at
+    }
