@@ -9,7 +9,8 @@
     "lint": "next lint",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "test:e2e": "cp tsconfig.json tsconfig.json.bak && TS_NODE_PROJECT=tsconfig.e2e.json playwright test && cp tsconfig.json.bak tsconfig.json && rm tsconfig.json.bak"
+    "test:e2e": "cp tsconfig.json tsconfig.json.bak && TS_NODE_PROJECT=tsconfig.e2e.json playwright test && cp tsconfig.json.bak tsconfig.json && rm tsconfig.json.bak",
+    "db:migrate": "ts-node scripts/init-db.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -45,6 +46,26 @@
     "node-mocks-http": "^1.17.2",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
-  }
+  },
+  "description": "A modern web application for simulating stock trading and tracking a virtual portfolio, built with [Next.js](https://nextjs.org). Users can search for real stocks, view live prices, simulate trades, and monitor their portfolio performance—all in a responsive, user-friendly interface.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lantel-Dev/Github_Assessment_David_Jesse_Odhiambo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Lantel-Dev/Github_Assessment_David_Jesse_Odhiambo/issues"
+  },
+  "homepage": "https://github.com/Lantel-Dev/Github_Assessment_David_Jesse_Odhiambo#readme"
 }
