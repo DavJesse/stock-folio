@@ -256,3 +256,101 @@ paths:
                 properties:
                   error:
                     type: string                   # Error description (e.g., "Internal server error")
+
+  /transactions/buy:
+    post:
+      summary: Buy stocks and add to user portfolio
+      tags: [Transactions]
+
+      # Request body must include symbol, quantity, and price
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [symbol, quantity, price]
+              properties:
+                # Ticker symbol of the stock to buy (e.g. AAPL, MSFT)
+                symbol:
+                  type: string
+                  description: Stock ticker symbol (e.g., AAPL)
+                  example: AAPL
+                # Number of shares to buy
+                quantity:
+                  type: integer
+                  description: Number of shares to buy
+                  example: 10
+                # Price per share at the time of purchase
+                price:
+                  type: number
+                  description: Price per share at time of purchase
+                  example: 150.00
+
+      # Require CSRF and bearer token authentication
+      security:
+        - csrfToken: []
+        - bearerAuth: []
+
+      # Possible responses from this endpoint
+      responses:
+        # If purchase is successful
+        '200':
+          description: Stock purchase successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+
+        # If required fields are missing or invalid
+        '400':
+          description: Missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing or invalid parameters
+
+        # If user is not authenticated
+        '401':
+          description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+
+        # If CSRF token is invalid or missing
+        '403':
+          description: Invalid CSRF token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid CSRF token
+
+        # If an unexpected error occurs on the server
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Something went wrong
+                    
