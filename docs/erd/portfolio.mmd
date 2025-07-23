@@ -1,0 +1,8 @@
+erDiagram
+  %% Portfolio table
+  portfolio {
+        INTEGER id PK
+        INTEGER user_id FK "REFERENCES users(id)"
+        TEXT name
+        DATETIME created_at
+    }
