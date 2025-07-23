@@ -48,13 +48,12 @@ erDiagram
         DATETIME updated_at
     }
 
-    transactions {
-        INTEGER id PK
-        INTEGER user_id FK "REFERENCES users(id)"
-        INTEGER account_id FK "REFERENCES accounts(id)"
-        INTEGER stock_id FK "REFERENCES stocks(id)"
-        TEXT transaction_type
-        INTEGER quantity
-        REAL price_at_transaction
-        DATETIME timestamp
-    }
+  transactions {
+      INTEGER id PK
+      INTEGER user_id FK "REFERENCES users(id) ON DELETE CASCADE"
+      TEXT symbol
+      INTEGER quantity   
+      REAL price
+      TEXT type      
+      DATETIME created_at
+  }
