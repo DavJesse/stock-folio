@@ -66,7 +66,7 @@ export default function StockSearchBar() {
           <ul className="absolute left-0 right-0 w-full mt-2 bg-white/5 backdrop-blur-md rounded-lg shadow-lg z-50">
             {results.map((stock) => (
               <li
-                key={stock.symbol}
+                key={`${stock.symbol}-${stock.description}`}
                 className="p-2 text-white hover:bg-white/10 cursor-pointer hover:scale-102 transition-transform"
               >
                 <strong>{stock.symbol}</strong> - {stock.description} ({stock.type})
