@@ -1,9 +1,14 @@
-// Initialize and export a singleton SQLite database connection using better-sqlite3
-
 import Database from 'better-sqlite3';
+import path from 'path';
 
-// Create a new database connection to the specified SQLite file
-const db = new Database('db/db.sqlite');
+// Resolve the path to the SQLite database file
+const dbPath = path.resolve(process.cwd(), 'db/db.sqlite');
 
-// Export the database connection for use in other modules
+// Create a persistent database connection
+const db = new Database(dbPath);
+
+// Enable foreign key constraint enforcement
+db.pragma('foreign_keys = ON');
+
+// Export the database instance for use across the application
 export default db;
