@@ -2,18 +2,19 @@ import db from '@/lib/db'
 import bcrypt from 'bcrypt'
 import { handleSignup } from '@/lib/handlers/signup'
 import { User } from '@/types/user'
-
-// Utility function to remove a test user by email
-const deleteTestUser = (email: string) => {
-  db.prepare('DELETE FROM users WHERE email = ?').run(email)
-}
+import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
 
 describe('handleSignup', () => {
   beforeEach(() => {
     // Ensure clean state by removing test users (without clearing entire table)
-    deleteTestUser('test@example.com')
-    deleteTestUser('hashcheck@example.com')
+    deleteTestUserByEmail('test@example.com')
+    deleteTestUserByEmail('hashcheck@example.com')
   })
+
+  afterEach(() => {
+    deleteTestUserByEmail('test@example.com')
+    deleteTestUserByEmail('hashcheck@example.com')
+  });
 
   it('should return 201 when a new user is successfully registered', async () => {
     const res = await handleSignup({
