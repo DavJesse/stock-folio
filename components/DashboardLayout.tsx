@@ -1,10 +1,10 @@
 'use client'
 
 // Imports
-import { useState } from 'react'
+import { useState, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { ReactNode } from 'react'
 import StockSearchBar from '@/components/SearchBar'
+import DemoPopup from '@/components/DemoPopup'
 
 // Icons
 import {
@@ -127,7 +127,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content area */}
       <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto w-full">
-        <StockSearchBar />
+        <DemoPopup /> {/* Render DemoPopup if localStorage has demoMessage */}
+        <StockSearchBar /> {/* Render search bar at the top */}
         {children}
       </main>
     </div>
