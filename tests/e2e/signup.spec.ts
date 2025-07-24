@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import db from '@/lib/db'
+import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
 
 test.describe('Sign up flow', () => {
   let testEmail = ''
@@ -7,7 +7,7 @@ test.describe('Sign up flow', () => {
   // After each test, clean up the test user from the database
   test.afterEach(() => {
     if (testEmail) {
-      db.prepare('DELETE FROM users WHERE email = ?').run(testEmail)
+      deleteTestUserByEmail(testEmail)
     }
   })
 
@@ -38,5 +38,22 @@ test.describe('Sign up flow', () => {
 
     // Expect redirection to the dashboard
     await expect(page).toHaveURL('/dashboard')
+
+    // Wait for popup with "Congratulations!" or 🎉 emoji
+    const popup = page.getByRole('dialog')
+    await expect(popup).toBeVisible()
+    await expect(popup).toContainText('Congratulations!')
+    await expect(popup).toBeVisible()
+
+    // Check popup contains message
+    await expect(popup).toContainText('Congratulations!')
+    await expect(popup).toContainText('🎉')
+
+    // Close the popup
+    const closeButton = popup.getByRole('button', { name: /close popup/i })
+    await closeButton.click()
+
+    // Verify it disappears
+    await expect(popup).toBeHidden()
   })
 })
