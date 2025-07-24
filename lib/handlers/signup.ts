@@ -47,10 +47,33 @@ export async function handleSignup(
   const saltRounds = 10;
   const passwordHash = await bcrypt.hash(password, saltRounds);
 
-  // Insert the new user into the database with a creation timestamp
-  db.prepare(
-    'INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, datetime(\'now\', \'localtime\'))'
-  ).run(email, passwordHash);
+  // Start a transaction for atomic user/account creation
+  const insertUserStmt = db.prepare(`
+    INSERT INTO users (email, password_hash, created_at)
+    VALUES (?, ?, datetime('now', 'localtime'))
+  `)
+
+  const insertAccountStmt = db.prepare(`
+    INSERT INTO accounts (user_id, cash_balance, created_at, updated_at)
+    VALUES (?, ?, datetime('now', 'localtime'), datetime('now', 'localtime'))
+  `)
+
+  const transaction = db.transaction(() => {
+    const userResult = insertUserStmt.run(email, passwordHash)
+    const userId = userResult.lastInsertRowid as number
+
+    insertAccountStmt.run(userId, 10_000) // Award $10,000 virtual cash
+  })
+
+  try {
+    transaction()
+  } catch (err) {
+    console.error('Signup transaction failed:', err)
+    return {
+      status: 500,
+      body: { error: 'Failed to create account' },
+    }
+  }
 
   return {
     status: 201,
