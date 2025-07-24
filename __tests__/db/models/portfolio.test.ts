@@ -17,16 +17,34 @@ const migrationPaths = [
   path.join(__dirname, '../../../db/migrations/003_create_portfolio_table.sql'),
 ]
 
-// Run migrations before all tests once
-beforeAll(() => {
-  createTestDB(migrationPaths)
-})
+const deleteTestUser = (email: string, userId: number) => {
+  // Look up user by email
+  const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email)
+  if (!user) {
+    return
+  }
 
-// Clean up tables before each individual test
-beforeEach(() => {
-  db.prepare('DELETE FROM portfolio').run()
-  db.prepare('DELETE FROM users').run()
-})
+  const deleteTransactionsStmt = db.prepare(`
+    DELETE FROM transactions
+    WHERE user_id IN (SELECT id FROM accounts WHERE user_id = ?)
+  `)
+
+  const deleteAccountsStmt = db.prepare(`
+    DELETE FROM accounts WHERE user_id = ?
+  `)
+
+  const deleteUserStmt = db.prepare(`
+    DELETE FROM users WHERE id = ?
+  `)
+
+  const transaction = db.transaction((userId: number) => {
+    deleteTransactionsStmt.run(userId)
+    deleteAccountsStmt.run(userId)
+    deleteUserStmt.run(userId)
+  })
+
+  transaction(userId)
+}
 
 describe('Portfolio Model', () => {
   const user = {
@@ -38,7 +56,13 @@ describe('Portfolio Model', () => {
 
   // Insert a user into the database before each test
   beforeEach(() => {
+    createTestDB(migrationPaths)
+    deleteTestUser(user.email, user.id)
     insertUser(user)
+  })
+
+  afterEach(() => {
+    deleteTestUser(user.email, user.id)
   })
 
   it('inserts and fetches a holding', async () => {
