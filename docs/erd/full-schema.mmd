@@ -3,8 +3,8 @@ erDiagram
     %% Relationships
     users ||--o{ transactions : has
     users ||--o{ sessions : creates
-    users ||--|| portfolios : owns
-    portfolios ||--o{ accounts : contains
+    users ||--|| portfolio : owns
+    portfolio ||--o{ accounts : contains
     accounts ||--o{ transactions : performs
     stocks ||--o{ transactions : involves
 
@@ -17,19 +17,22 @@ erDiagram
         DATETIME created_at
     }
 
-    portfolios {
-        INTEGER id PK
-        INTEGER user_id FK "REFERENCES users(id)"
-        TEXT name
-        DATETIME created_at
+    portfolio {
+      INTEGER id PK
+      INTEGER user_id FK "REFERENCES users(id) ON DELETE CASCADE"
+      TEXT symbol
+      INTEGER quantity
+      REAL average_price
+      DATETIME created_at
+      DATETIME updated_at
     }
 
     accounts {
-        INTEGER id PK
-        INTEGER portfolio_id FK "REFERENCES portfolios(id)"
-        TEXT account_type
-        REAL balance
-        DATETIME created_at
+      INTEGER id PK
+      INTEGER user_id FK "REFERENCES users(id) ON DELETE CASCADE"
+      REAL cash_balance
+      DATETIME created_at
+      DATETIME updated_at
     }
 
     sessions {
