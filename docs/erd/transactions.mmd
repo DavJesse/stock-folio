@@ -1,0 +1,11 @@
+erDiagram
+  %% Transactions table
+  transactions {
+      INTEGER id PK
+      INTEGER user_id FK "REFERENCES users(id) ON DELETE CASCADE"
+      TEXT symbol
+      INTEGER quantity   
+      REAL price
+      TEXT type      
+      DATETIME created_at
+  }
