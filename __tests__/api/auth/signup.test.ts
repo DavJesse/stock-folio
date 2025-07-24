@@ -23,7 +23,7 @@ describe('handleSignup', () => {
     })
 
     expect(res.status).toBe(201)
-    expect(res.body).toEqual({ message: 'User created' })
+    expect(res.body).toEqual({ message: 'User created', demoMessage: 'You have unlocked your demo account and have been awarded $10,000.' })
 
     // Check that the user was actually inserted into the database
     const user = db
@@ -46,6 +46,7 @@ describe('handleSignup', () => {
   })
 
   it('should return 409 when user already exists', async () => {
+    deleteTestUserByEmail('test@example.com')
     // Seed the database with an existing user to trigger a conflict
     db.prepare(
       'INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, datetime(\'now\', \'localtime\'))'
