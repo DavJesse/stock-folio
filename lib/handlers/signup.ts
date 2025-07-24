@@ -77,6 +77,9 @@ export async function handleSignup(
 
   return {
     status: 201,
-    body: { message: 'User created' },
+    body: { 
+      message: 'User created',
+      demoMessage: 'You have unlocked your demo account and have been awarded $10,000.'
+     },
   };
 }
