@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
  */
 interface SignUpResponse {
   message: string
+  demoMessage?: string
 }
 
 /**
@@ -116,7 +117,14 @@ export default function SignUpForm() {
           setEmail('')
           setPassword('')
           setConfirmPassword('')
-          router.push('/dashboard') // Redirect after login
+          
+          // Save demo message in local storage for retrieval in DemoPopup
+        if (data.demoMessage) {
+          localStorage.setItem('demoMessage', data.demoMessage)
+        }
+        
+        router.push('/dashboard') // Redirect to dashboard
+
         }
       } else {
         // Network or unexpected issue
