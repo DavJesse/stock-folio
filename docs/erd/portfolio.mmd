@@ -1,8 +1,11 @@
 erDiagram
   %% Portfolio table
   portfolio {
-        INTEGER id PK
-        INTEGER user_id FK "REFERENCES users(id)"
-        TEXT name
-        DATETIME created_at
+      INTEGER id PK
+      INTEGER user_id FK "REFERENCES users(id) ON DELETE CASCADE"
+      TEXT symbol
+      INTEGER quantity
+      REAL average_price
+      DATETIME created_at
+      DATETIME updated_at
     }
