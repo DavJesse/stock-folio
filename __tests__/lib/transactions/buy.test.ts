@@ -2,7 +2,7 @@ import { buyStock } from '@/lib/transactions/buy'
 import { insertUser } from '@/db/models/users'
 import * as accountModel from '@/db/models/accounts'
 import * as portfolioModel from '@/db/models/portfolio'
-import db from '@/lib/db'
+import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
 
 // Mock dependent modules to isolate the buyStock logic
 jest.mock('@/db/models/accounts')
@@ -25,13 +25,13 @@ describe('buyStock', () => {
   beforeEach(() => {
     // Reset mock call history and DB state before each test
     jest.clearAllMocks()
-    db.prepare('DELETE FROM users WHERE id = ?').run(user.id)
+    deleteTestUserByEmail(user.email)
     insertUser(user)
   })
 
   afterEach(() => {
     // Clean up user after each test to avoid test bleed
-    db.prepare('DELETE FROM users WHERE id = ?').run(user.id)
+    deleteTestUserByEmail(user.email)
   })
 
   it('should buy a new stock when user has enough cash', async () => {
