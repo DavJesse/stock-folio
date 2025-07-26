@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { useSearchStocks } from '@/hooks/use-search-stocks'
+import Link from 'next/link'
 
 /**
  * StockSearchBar Component
@@ -56,7 +57,7 @@ export default function StockSearchBar() {
 
         {/* Error message */}
         {error && (
-          <div className="text-red-500">
+          <div className="text-[var(--warning-color)]">
             {error}
           </div>
         )}
@@ -65,11 +66,14 @@ export default function StockSearchBar() {
         {results.length > 0 && (
           <ul className="absolute left-0 right-0 w-full mt-2 bg-white/5 backdrop-blur-md rounded-lg shadow-lg z-50">
             {results.map((stock) => (
-              <li
-                key={`${stock.symbol}-${stock.description}`}
-                className="p-2 text-white hover:bg-white/10 cursor-pointer hover:scale-102 transition-transform"
-              >
-                <strong>{stock.symbol}</strong> - {stock.description} ({stock.type})
+              <li key={`${stock.symbol}-${stock.description}`}>
+                <Link
+                    href={`/dashboard/stocks/${stock.symbol}`}
+                    scroll={false}
+                    className="p-2 text-white hover:bg-white/10 cursor-pointer hover:scale-102 transition-transform"
+                >
+                  <strong>{stock.symbol}</strong> - {stock.description} ({stock.type})
+                </Link>
               </li>
             ))}
           </ul>
