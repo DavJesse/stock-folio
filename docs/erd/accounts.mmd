@@ -1,9 +1,10 @@
 erDiagram
     %% Accounts table
     accounts {
-      INTEGER id PK
-      INTEGER user_id FK "REFERENCES users(id) ON DELETE CASCADE"
-      REAL cash_balance
-      DATETIME created_at
-      DATETIME updated_at
+       INTEGER id PK
+       INTEGER portfolio_id FK "REFERENCES portfolios(id)"
+       TEXT account_type
+       REAL balance
+       DATETIME created_at
     }
+    
