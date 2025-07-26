@@ -1,4 +1,4 @@
-// Imports
+// lib/security/validate-csrf.ts
 import { NextRequest } from 'next/server'
 
 /**
@@ -10,7 +10,8 @@ import { NextRequest } from 'next/server'
  */
 export async function validateCsrf(req: NextRequest): Promise<boolean> {
   const cookieToken = req.cookies.get('csrfToken')?.value
-  const headerToken = req.headers.get('x-csrf-token')
+  // Try both cases to be safe
+  const headerToken = req.headers.get('X-CSRF-Token') || req.headers.get('x-csrf-token')
 
   // Tokens must exist and match
   return !!cookieToken && !!headerToken && cookieToken === headerToken
