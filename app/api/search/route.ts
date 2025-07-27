@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifyTokenFromRequest } from '@/lib/security/verify-token'
 
 /**
  * GET handler for stock search endpoint.
  * Accepts a query parameter `q`, validates it, and forwards the request to the Finnhub API.
  */
 export async function GET(req: NextRequest) {
+  // Authenticate user
+  const user = await verifyTokenFromRequest(req)
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { searchParams } = new URL(req.url)
   const query = searchParams.get('q')?.trim().toUpperCase()
 
