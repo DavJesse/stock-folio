@@ -11,7 +11,7 @@ import jwt from 'jsonwebtoken'
 *
 * @param id - User ID to encode in the JWT
 */
-export async function setSessionCookie(id: number) {
+export async function setSessionCookie(id: string) {
   const secret = process.env.JWT_SECRET as string
 
   if (!secret) {
