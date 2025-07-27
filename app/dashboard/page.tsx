@@ -2,9 +2,9 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { getUserIdFromSession } from '@/db/models/sessions'
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
   // Read token from cookie store
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const sessionId = cookieStore.get('token')?.value
 
   // Extract userId from session if available
