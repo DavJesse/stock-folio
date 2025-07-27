@@ -1,6 +1,7 @@
 import db from '@/lib/db'
 import bcrypt from 'bcrypt'
-import { setSessionCookie } from '../security/set-session-cookie'
+import { setSessionCookie } from '@/lib/security/set-session-cookie'
+import { createSession } from '@/db/models/sessions'
 
 type SignupPayload = {
   email: string
@@ -62,8 +63,11 @@ export async function handleSignup(
       }
     }
 
+    // Log session to database
+    const sessionId = createSession(userId)
+
     // Set session cookie for the new user
-    await setSessionCookie(userId)
+    await setSessionCookie(sessionId)
 
     return {
       status: 201,
