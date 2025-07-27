@@ -34,7 +34,7 @@ export function getUserIdFromSession(sessionId: string): number | undefined {
 /**
  * Deletes a session from the database.
  */
-export function deleteSession(sessionId: string): void {
+export async function deleteSession(sessionId: string): Promise<void> {
   db.prepare(`DELETE FROM sessions WHERE id = ?`).run(sessionId)
 }
 
