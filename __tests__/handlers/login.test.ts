@@ -1,9 +1,11 @@
 // External dependencies
 import bcrypt from 'bcrypt'
+import db from '@/lib/db'
 
 // Internal application modules
 import { handleLogin } from '@/lib/handlers/login'
 import { findUserByEmail } from '@/lib/queries/users/users'
+import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
 import { User } from '@/types/user' // Import User type for strong typing
 
 // Mock the bcrypt and database methods for isolated unit testing
@@ -22,6 +24,19 @@ describe('handleLogin', () => {
   beforeEach(() => {
     // Ensure mocks are reset before each test
     jest.clearAllMocks()
+
+    // Clear any instances of test user in the database
+    deleteTestUserByEmail(mockUser.email)
+
+    // Insert real user so foreign key doesn't fail
+    db.prepare(`
+      INSERT INTO users (id, email, password_hash, created_at)
+      VALUES (?, ?, ?, datetime('now'))
+    `).run(mockUser.id, mockUser.email, mockUser.password_hash)
+  })
+
+  afterEach(() => {
+    deleteTestUserByEmail(mockUser.email)
   })
 
   it('returns 400 if email is missing', async () => {
@@ -59,13 +74,13 @@ describe('handleLogin', () => {
     expect(res.message).toMatch(/invalid credentials/i)
   })
 
-  it('returns 200 and a token on valid credentials', async () => {
+  it('returns 200 and a session id on valid credentials', async () => {
     ;(findUserByEmail as jest.Mock).mockResolvedValue(mockUser)
     ;(bcrypt.compare as jest.Mock).mockResolvedValue(true)
 
     const res = await handleLogin(mockUser.email, 'password123')
     expect(res.status).toBe(200)
-    expect(res.token).toBeDefined()
+    expect(res.sessionId).toBeDefined()
     expect(res.message).toMatch(/success/i)
   })
 })
