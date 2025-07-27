@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   const sessionId = req.cookies.get('token')?.value
 
   if (sessionId) {
-    deleteSession(sessionId)
+    await deleteSession(sessionId)
   }
 
   const response = new NextResponse(
