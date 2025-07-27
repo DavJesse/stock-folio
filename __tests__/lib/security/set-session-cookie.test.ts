@@ -27,7 +27,7 @@ describe('setSessionCookie', () => {
   })
 
   it('should sign a JWT and set it as a cookie', async () => {
-    const userId = 123
+    const userId = '123'
 
     await setSessionCookie(userId)
 
