@@ -38,7 +38,6 @@ erDiagram
     sessions {
         INTEGER id PK
         INTEGER user_id FK "REFERENCES users(id)"
-        TEXT token
         DATETIME expires_at
         DATETIME created_at
     }
