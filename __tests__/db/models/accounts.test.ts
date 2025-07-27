@@ -1,12 +1,15 @@
 import db from '@/lib/db'
 import { getAccountByUserId, updateCashBalance } from '@/db/models/accounts'
+import deleteUserByUserId from '@/lib/test-helpers/delete-user-by-id'
+import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
 
 describe('account model', () => {
   const userId = 9999
 
   beforeEach(() => {
     // Ensure test isolation by removing any existing user
-    db.prepare('DELETE FROM users WHERE id = ?').run(userId)
+    deleteUserByUserId(userId)
+    deleteTestUserByEmail('test@example.com')
 
     // Insert a test user
     db.prepare(`
@@ -23,8 +26,7 @@ describe('account model', () => {
 
   afterEach(() => {
     // Remove test account and user records after each test
-    db.prepare('DELETE FROM accounts WHERE user_id = ?').run(userId)
-    db.prepare('DELETE FROM users WHERE id = ?').run(userId)
+    deleteUserByUserId(userId)
   })
 
   it('getAccountByUserId returns the correct account', async () => {
