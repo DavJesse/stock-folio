@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import bcrypt from 'bcrypt'
 import db from '@/lib/db'
+import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
 
 test.describe('Login and Logout flow (DB seeded)', () => {
   const TEST_EMAIL = `user${Date.now()}@example.com`
@@ -18,7 +19,7 @@ test.describe('Login and Logout flow (DB seeded)', () => {
 
   // After the test, clean up the user
   test.afterEach(() => {
-    db.prepare('DELETE FROM users WHERE email = ?').run(TEST_EMAIL)
+    deleteTestUserByEmail(TEST_EMAIL)
   })
 
   test('user can log in and log out', async ({ page }) => {
