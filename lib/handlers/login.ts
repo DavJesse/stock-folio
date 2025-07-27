@@ -41,7 +41,7 @@ export async function handleLogin(email: string, password: string) {
 
   // Generate JWT token with a 1-hour expiration
   const token = jwt.sign({ id: user.id, email: user.email }, SECRET, {
-    expiresIn: '1h',
+    expiresIn: '1d',
   })
 
   return {
