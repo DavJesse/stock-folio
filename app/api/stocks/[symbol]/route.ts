@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { verifyTokenFromRequest } from '@/lib/security/verify-token'
 
 // Quote data returned from /quote endpoint
 type QuoteData = {
@@ -26,6 +27,15 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ symbol: string }> }
 ) {
+  // Validate session
+  const user = await verifyTokenFromRequest(req)
+  if (!user) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
   try {
     const { symbol } = await params
     const upperSymbol = symbol.toUpperCase()
