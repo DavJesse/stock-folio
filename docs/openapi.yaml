@@ -195,15 +195,22 @@ paths:
                     
   /search:
     get:
-      summary: Search for stock symbols            # Short description for API docs and UIs
-      tags: [Stocks]                               # Logical grouping for endpoints
+      summary: Search for stock symbols              # Short description for API docs and UIs
+      tags: [Stocks]                                 # Logical grouping for endpoints
+      description: >
+        Authenticated endpoint that searches for stock symbols via the Finnhub API.
+        Requires a valid JWT token. Accepts a query parameter `q` for the stock symbol or name.
+
+      security:
+        - bearerAuth: []
+
       parameters:
         - name: q
           in: query
-          required: true                           # Query parameter is required
-          description: Stock symbol or name query  # Description for documentation
+          required: true                             # Query parameter is required
+          description: Stock symbol or name query
           schema:
-            type: string                           # Expected type of query parameter
+            type: string
 
       responses:
         '200':
@@ -214,48 +221,61 @@ paths:
                 type: object
                 properties:
                   count:
-                    type: integer                  # Total number of matching results (if applicable)
+                    type: integer
                     example: 1
                   result:
-                    type: array                    # List of matching stocks
+                    type: array
                     items:
                       type: object
                       properties:
                         symbol:
-                          type: string             # Stock ticker symbol
+                          type: string
                           example: AAPL
                         name:
-                          type: string             # Company name
+                          type: string
                           example: Apple Inc.
                         type:
-                          type: string             # Instrument type (e.g., "Equity")
+                          type: string
                           example: Equity
                         region:
-                          type: string             # Market region (e.g., "US")
+                          type: string
                           example: US
                         description:
-                          type: string             # Description or summary
+                          type: string
                           example: Apple Inc. (Equity)
 
         '400':
-          description: Missing search query        # Triggered when query is not provided
+          description: Missing search query
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   error:
-                    type: string                   # Error message (e.g., "Missing search query")
+                    type: string
+                    example: Missing search query
+
+        '401':
+          description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
 
         '500':
-          description: Server error or API key issue # Catch-all for unexpected failures
+          description: Internal server error or API failure
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   error:
-                    type: string                   # Error description (e.g., "Internal server error")
+                    type: string
+                    example: Internal server error                 # Error description (e.g., "Internal server error")
 
   /transactions/buy:
     post:
@@ -353,4 +373,232 @@ paths:
                   error:
                     type: string
                     example: Something went wrong
-                    
+
+  /transactions/sell:
+    post:
+      summary: Sell Stock
+      description: Allows an authenticated user to sell a specified quantity of a stock at a given price.
+      tags:
+        - Transactions
+      security:
+        - bearerAuth: []  # JWT token authentication
+        - csrfToken: []   # CSRF protection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - symbol
+                - quantity
+                - price
+              properties:
+                symbol:
+                  type: string
+                  example: "AAPL"
+                quantity:
+                  type: number
+                  example: 5
+                price:
+                  type: number
+                  example: 192.45
+      responses:
+        '200':
+          description: Successful stock sale
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Stock sold successfully"
+                  transactionId:
+                    type: string
+                    example: "txn_abc123"
+        '400':
+          description: Bad request due to missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Missing or invalid parameters"
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+        '403':
+          description: Invalid CSRF token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid CSRF token"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Something went wrong"
+                   
+  /account/balance:
+    get:
+      summary: Retrieve user's cash balance              # Short description for API docs and UIs
+      tags: [Accounts]                                   # Logical grouping for endpoints
+      description: >
+        Authenticated endpoint that returns the user's current cash balance.
+        Requires a valid session cookie containing a JWT token.
+
+      # This endpoint requires authentication via session cookie
+      security:
+        - bearerAuth: []
+
+      responses:
+        '200':
+          description: Balance retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cash_balance:
+                    type: number                         # User's current cash balance
+                    example: 10000.00
+
+        '401':
+          description: Unauthorized - invalid or missing token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string                         # Error message (e.g., "Unauthorized")
+                    example: Unauthorized
+
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string                         # Error message (e.g., "Account not found")
+                    example: Account not found
+
+  /api/stocks/{symbol}:
+    get:
+      summary: Get stock quote and profile
+      description: |
+        Returns current quote and basic profile info for a given stock symbol.
+        Requires authentication via bearer token in the request cookie.
+      tags: [Stocks]
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          description: Stock symbol (e.g., AAPL)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully fetched stock data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  symbol:
+                    type: string
+                    example: AAPL
+                  name:
+                    type: string
+                    example: Apple Inc
+                  c:
+                    type: number
+                    description: Current price
+                    example: 172.45
+                  price:
+                    type: number
+                    description: Alias for current price (same as `c`)
+                    example: 172.45
+                  d:
+                    type: number
+                    description: Change
+                    example: -1.23
+                  dp:
+                    type: number
+                    description: Percent change
+                    example: -0.71
+                  h:
+                    type: number
+                    description: High price of the day
+                    example: 174.2
+                  l:
+                    type: number
+                    description: Low price of the day
+                    example: 170.3
+                  o:
+                    type: number
+                    description: Open price
+                    example: 173.0
+                  pc:
+                    type: number
+                    description: Previous close price
+                    example: 173.68
+                  country:
+                    type: string
+                    example: United States
+                  currency:
+                    type: string
+                    example: USD
+                  exchange:
+                    type: string
+                    example: NASDAQ
+                  logo:
+                    type: string
+                    format: uri
+                    example: https://logo.clearbit.com/apple.com
+                  weburl:
+                    type: string
+                    format: uri
+                    example: https://www.apple.com
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+        '500':
+          description: Server or API key error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Internal server error
+
