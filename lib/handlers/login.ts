@@ -1,12 +1,9 @@
 // External dependencies
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
 
-// Internal database query
+// Internal dependencies
 import { findUserByEmail } from '@/lib/queries/users/users'
-
-// Fallback secret for JWT — ensure this is overridden in production via .env
-const SECRET = process.env.JWT_SECRET || 'default_secret'
+import { createSession } from '@/db/models/sessions'
 
 /**
  * Handles user login by validating credentials and returning a signed JWT on success.
@@ -39,14 +36,12 @@ export async function handleLogin(email: string, password: string) {
     return { status: 401, message: 'Invalid credentials.' }
   }
 
-  // Generate JWT token with a 1-hour expiration
-  const token = jwt.sign({ id: user.id, email: user.email }, SECRET, {
-    expiresIn: '1d',
-  })
+  // Log session to database
+  const sessionId = createSession(user.id)
 
   return {
     status: 200,
     message: 'Login successful.',
-    token,
+    sessionId,
   }
 }
