@@ -1,5 +1,5 @@
 import { getAccountByUserId } from '@/db/models/accounts'
-import { verifyTokenFromRequest } from '@/lib/security/verify-token'
+import { getUserFromSessionCookie } from '@/lib/security/get-user-from-session-cookie'
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server'
  */
 export async function GET(req: NextRequest) {
   // Verify and decode user token from the request
-  const user = await verifyTokenFromRequest(req)
+  const user = getUserFromSessionCookie(req)
 
   if (!user) {
     return NextResponse.json(
