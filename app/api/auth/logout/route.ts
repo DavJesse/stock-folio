@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateCsrf } from '@/lib/security/validate-csrf'
 import { deleteSession } from '@/db/models/sessions'
 
 /**
@@ -7,10 +6,6 @@ import { deleteSession } from '@/db/models/sessions'
  * Clears the auth token cookie and deletes session from DB.
  */
 export async function POST(req: NextRequest) {
-  if (!(await validateCsrf(req))) {
-    return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 })
-  }
-
   const sessionId = req.cookies.get('token')?.value
 
   if (sessionId) {
