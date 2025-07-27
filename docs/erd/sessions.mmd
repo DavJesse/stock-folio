@@ -1,0 +1,8 @@
+erDiagram
+  %% TSessions table
+   sessions {
+       INTEGER id PK
+       INTEGER user_id FK "REFERENCES users(id)"
+       DATETIME expires_at
+       DATETIME created_at
+   }
