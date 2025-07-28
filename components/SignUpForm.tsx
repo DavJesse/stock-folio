@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import zxcvbn from 'zxcvbn'
+
 
 /**
  * Interface for the expected shape of the signup response
@@ -29,7 +31,10 @@ export default function SignUpForm() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
+  // Security states
   const [csrfToken, setCsrfToken] = useState<string | null>(null)
+  const [passwordScore, setPasswordScore] = useState(0)
+  const passwordIsStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password)
 
   // Fetch CSRF token on mount
   useEffect(() => {
@@ -52,7 +57,8 @@ export default function SignUpForm() {
     /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email) &&
     password.length >= 6 &&
     confirmPassword.length >= 6 &&
-    password === confirmPassword
+    password === confirmPassword &&
+    passwordIsStrong
 
   // Handles form submission logic
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -111,6 +117,7 @@ export default function SignUpForm() {
 
         if (!response.ok) {
           setError(data.message || 'Something went wrong.')
+          return
         } else {
           // Signup successful
           setSuccess(true)
@@ -149,9 +156,9 @@ export default function SignUpForm() {
         )}
 
         {success && (
-          <p role="status" className="text-[var(--success-color)]">
+          <output className="text-[var(--success-color)]">
             Account created successfully!
-          </p>
+          </output>
         )}
 
         {/* Email input field */}
@@ -181,9 +188,56 @@ export default function SignUpForm() {
             type="password"
             className="bg-[var(--primary-background)] text-white py-1 px-2"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              const pwd = e.target.value
+              setPassword(pwd)
+              setPasswordScore(zxcvbn(pwd).score) // update password score on every keystroke
+            }}
             required
           />
+        {password && (
+          <>
+            {(() => {
+              // Extract background color logic
+              let backgroundColor = 'red'
+              switch (passwordScore) {
+                case 1:
+                  backgroundColor = 'orange'
+                  break
+                case 2:
+                  backgroundColor = 'yellow'
+                  break
+                case 3:
+                  backgroundColor = 'lightgreen'
+                  break
+                case 4:
+                  backgroundColor = 'green'
+                  break
+              }
+            
+              return (
+                <div className="mt-1 w-full h-2 bg-gray-300 rounded">
+                  <div
+                    className="h-full rounded transition-all duration-300"
+                    style={{
+                      width: `${(passwordScore + 1) * 20}%`,
+                      backgroundColor,
+                    }}
+                  ></div>
+                </div>
+              )
+            })()}
+          </>
+        )}
+
+        {password && (
+          <p className="text-sm text-white mt-1">
+            Strength: {
+              ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'][passwordScore]
+            }
+          </p>
+        )}
+
         </div>
 
         {/* Confirm password field */}
