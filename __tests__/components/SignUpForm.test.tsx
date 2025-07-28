@@ -80,8 +80,8 @@ describe('SignUpForm', () => {
   it('shows error if passwords do not match', async () => {
     render(<SignUpForm />)
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'user@example.com' } })
-    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'password123' } })
-    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'wrongpass' } })
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'p@ssword123' } })
+    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'wrongp@ss' } })
     fireEvent.submit(screen.getByRole('form', { name: /signup-form/i }))
     await waitFor(() => {
       expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument()
@@ -115,11 +115,11 @@ describe('SignUpForm', () => {
       expect(document.cookie).toMatch(/csrfToken=test-csrf-token/)
     })
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'fail@example.com' } })
-    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'password123' } })
-    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'password123' } })
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'P@ssword123' } })
+    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'P@ssword123' } })
     fireEvent.click(screen.getByRole('button', { name: /submit-signup/i }))
     await waitFor(() => {
-      expect(screen.getByText(/invalid server response/i)).toBeInTheDocument()
+      expect(screen.getByText(/Invalid server response/i)).toBeInTheDocument()
     })
   })
 
@@ -153,8 +153,8 @@ describe('SignUpForm', () => {
       expect(document.cookie).toMatch(/csrfToken=test-csrf-token/)
     })
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'test@example.com' } })
-    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'securePass123' } })
-    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'securePass123' } })
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'secureP@ss123' } })
+    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'secureP@ss123' } })
     fireEvent.click(screen.getByRole('button', { name: /submit-signup/i }))
     await waitFor(() => {
       expect(screen.getByText(/account created successfully/i)).toBeInTheDocument()
@@ -164,8 +164,8 @@ describe('SignUpForm', () => {
   it('shows error if any input field is left empty', async () => {
     render(<SignUpForm />)
     // Leave email blank
-    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'password123' } })
-    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'password123' } })
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'p@ssword123' } })
+    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'p@ssword123' } })
     fireEvent.submit(screen.getByRole('form', { name: /signup-form/i }))
     await waitFor(() => {
       expect(screen.getByText(/all fields are required/i)).toBeInTheDocument()
@@ -182,8 +182,8 @@ describe('SignUpForm', () => {
       expect(document.cookie).toMatch(/csrfToken=test-csrf-token/)
     })
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'reset@example.com' } })
-    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'validPass123' } })
-    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'validPass123' } })
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'validP@ss123' } })
+    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'validP@ss123' } })
     fireEvent.click(screen.getByRole('button', { name: /submit-signup/i }))
     await waitFor(() => {
       expect(screen.getByText(/account created successfully/i)).toBeInTheDocument()
@@ -221,8 +221,8 @@ describe('SignUpForm', () => {
       expect(document.cookie).toMatch(/csrfToken=test-csrf-token/)
     })
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'test@example.com' } })
-    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'securePass123' } })
-    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'securePass123' } })
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'secureP@ss123' } })
+    fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'secureP@ss123' } })
     fireEvent.click(screen.getByRole('button', { name: /submit-signup/i }))
     await waitFor(() => {
       expect(screen.getByText(/user already exists/i)).toBeInTheDocument()
