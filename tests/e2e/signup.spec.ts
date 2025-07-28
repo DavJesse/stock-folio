@@ -26,8 +26,8 @@ test.describe('Sign up flow', () => {
 
     // Fill out the signup form
     await page.fill('#email', testEmail)
-    await page.fill('#password', 'securePass123')
-    await page.fill('#confirmPassword', 'securePass123')
+    await page.fill('#password', 'secureP@ss123')
+    await page.fill('#confirmPassword', 'secureP@ss123')
 
     // Wait for validation and button activation
    const submitButton = page.getByLabel('submit-signup')
