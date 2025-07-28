@@ -2,6 +2,7 @@ import db from '@/lib/db'
 import bcrypt from 'bcrypt'
 import { setSessionCookie } from '@/lib/security/set-session-cookie'
 import { createSession } from '@/db/models/sessions'
+import isStrongPassword from '../passwords/is-strong-password'
 
 type SignupPayload = {
   email: string
@@ -22,6 +23,17 @@ export async function handleSignup(
     return {
       status: 400,
       body: { error: 'Email and password are required.' },
+    }
+  }
+
+  // Check password strength
+  if (!isStrongPassword(password)) {
+    return {
+      status: 400,
+      body: {
+        error:
+          'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.',
+      },
     }
   }
 
