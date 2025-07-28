@@ -29,7 +29,7 @@ describe('handleSignup', () => {
   it('should return 201 when a new user is successfully registered', async () => {
     const res = await handleSignup({
       email: 'test@example.com',
-      password: 'securePass123',
+      password: 'secureP@ss123',
     })
 
     const body = res.body as {
@@ -79,7 +79,7 @@ describe('handleSignup', () => {
 
     const res = await handleSignup({
       email: 'test@example.com',
-      password: 'anything',
+      password: 'secureP@ss123',
     })
 
     expect(res.status).toBe(409)
@@ -89,7 +89,7 @@ describe('handleSignup', () => {
   })
 
   it('should hash the password before storing', async () => {
-    const plainPassword = 'securePass123'
+    const plainPassword = 'secureP@ss123'
 
     const res = await handleSignup({
       email: 'hashcheck@example.com',
