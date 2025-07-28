@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyTokenFromRequest } from '@/lib/security/verify-token'
+import { getUserFromSessionCookie } from '@/lib/security/get-user-from-session-cookie'
 
 /**
  * GET handler for stock search endpoint.
@@ -7,7 +7,7 @@ import { verifyTokenFromRequest } from '@/lib/security/verify-token'
  */
 export async function GET(req: NextRequest) {
   // Authenticate user
-  const user = await verifyTokenFromRequest(req)
+  const user = await getUserFromSessionCookie(req)
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
