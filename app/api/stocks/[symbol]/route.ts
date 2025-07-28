@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { verifyTokenFromRequest } from '@/lib/security/verify-token'
+import { getUserFromSessionCookie } from '@/lib/security/get-user-from-session-cookie'
 
 // Quote data returned from /quote endpoint
 type QuoteData = {
@@ -28,7 +28,7 @@ export async function GET(
   { params }: { params: Promise<{ symbol: string }> }
 ) {
   // Validate session
-  const user = await verifyTokenFromRequest(req)
+  const user = await getUserFromSessionCookie(req)
   if (!user) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
