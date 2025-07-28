@@ -10,12 +10,6 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
-  // If user is not logged in and tries to access '/dashboard', redirect to '/'
-  const isProtected = pathname.startsWith('/dashboard')
-  if (isProtected && !token) {
-    return NextResponse.redirect(new URL('/', req.url))
-  }
-
   // Otherwise allow the request to continue
   return NextResponse.next()
 }
