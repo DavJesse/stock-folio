@@ -6,6 +6,7 @@ import db from '@/lib/db'
 import { handleLogin } from '@/lib/handlers/login'
 import { findUserByEmail } from '@/lib/queries/users/users'
 import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
+import deleteUserByUserId from '@/lib/test-helpers/delete-user-by-id'
 import { User } from '@/types/user' // Import User type for strong typing
 
 // Mock the bcrypt and database methods for isolated unit testing
@@ -27,6 +28,7 @@ describe('handleLogin', () => {
 
     // Clear any instances of test user in the database
     deleteTestUserByEmail(mockUser.email)
+    deleteUserByUserId(mockUser.id)
 
     // Insert real user so foreign key doesn't fail
     db.prepare(`
@@ -37,6 +39,7 @@ describe('handleLogin', () => {
 
   afterEach(() => {
     deleteTestUserByEmail(mockUser.email)
+    deleteUserByUserId(mockUser.id)
   })
 
   it('returns 400 if email is missing', async () => {
