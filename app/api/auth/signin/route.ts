@@ -27,12 +27,13 @@ export async function POST(req: NextRequest) {
     const response = NextResponse.json({ message: result.message }, { status: 200 })
 
     response.cookies.set('token', result.sessionId, {
-      httpOnly: true, // inaccessible from client-side JavaScript
-      secure: process.env.NODE_ENV === 'production', // only send over HTTPS in production
-      sameSite: 'lax', // prevents CSRF in most cases
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60, // 1 hour in seconds
+      maxAge: 60 * 60 * 24,
     })
+
 
     return response
   } catch (err) {
