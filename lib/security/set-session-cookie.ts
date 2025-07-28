@@ -1,6 +1,4 @@
 import { cookies } from 'next/headers'
-import jwt from 'jsonwebtoken'
-
 
 /**
  * setSessionCookie
@@ -12,20 +10,10 @@ import jwt from 'jsonwebtoken'
 * @param id - User ID to encode in the JWT
 */
 export async function setSessionCookie(id: string) {
-  const secret = process.env.JWT_SECRET as string
-
-  if (!secret) {
-    throw new Error('Missing JWT_SECRET')
-  }
-  // Generate JWT token valid for 1 day
-  const token = jwt.sign({ id }, secret, {
-    algorithm: 'HS256',
-    expiresIn: '1d',
-  })
 
   // Get the cookie store and set the session cookie
   const cookieStore = await cookies()
-  cookieStore.set('token', token, {
+  cookieStore.set('token', id, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
