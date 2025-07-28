@@ -3,6 +3,7 @@ import { insertUser } from '@/db/models/users'
 import * as accountModel from '@/db/models/accounts'
 import * as portfolioModel from '@/db/models/portfolio'
 import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
+import deleteUserByUserId from '@/lib/test-helpers/delete-user-by-id'
 
 jest.mock('@/db/models/accounts')
 jest.mock('@/db/models/portfolio')
@@ -28,12 +29,14 @@ describe('sellStock', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     deleteTestUserByEmail(user.email)
+    deleteUserByUserId(user.id)
     insertUser(user)
   })
 
   // Teardown: Remove user from DB after each test
   afterEach(() => {
     deleteTestUserByEmail(user.email)
+    deleteUserByUserId(user.id)
   })
 
   it('updates cash and portfolio when stock is sold', async () => {
