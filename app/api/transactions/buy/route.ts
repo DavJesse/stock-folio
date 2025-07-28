@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyTokenFromRequest } from '@/lib/security/verify-token'
+import { getUserFromSessionCookie } from '@/lib/security/get-user-from-session-cookie'
 import { validateCsrf } from '@/lib/security/validate-csrf'
 import { buyStock } from '@/lib/transactions/buy'
 
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Step 2: Authenticate user via token
-  const user = await verifyTokenFromRequest(req)
+  const user = await getUserFromSessionCookie(req)
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
