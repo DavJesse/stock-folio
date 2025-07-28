@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server'
  */
 export async function GET(req: NextRequest) {
   // Verify and decode user token from the request
-  const user = getUserFromSessionCookie(req)
+  const user = await getUserFromSessionCookie(req)
 
   if (!user) {
     return NextResponse.json(
