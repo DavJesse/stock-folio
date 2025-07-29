@@ -1,26 +1,32 @@
-type PortfolioEntry = {
-  symbol: string
-  quantity: number
-  initialPrice: number
-}
+// lib/portfolio/merge-portfolio-with-live-quotes.ts
+import { PortfolioEntry, EnrichedPortfolioEntry } from '@/types/portfolio'
 
-type LiveQuote = {
-  symbol: string
-  price: number
-  name?: string
-}
-
-export function mergePortfolioWithLiveQuotes(
+export default function mergePortfolioWithLiveQuotes(
   portfolio: PortfolioEntry[],
-  liveData: LiveQuote[]
-) {
+  liveQuotes: { symbol: string; price: number; name?: string }[]
+): EnrichedPortfolioEntry[] {
   return portfolio.map((entry) => {
-    const quote = liveData.find((q) => q.symbol === entry.symbol)
+    const quote = liveQuotes.find((q) => q.symbol === entry.symbol)
+
+    const currentPrice = quote?.price ?? 0
+    const company = quote?.name ?? entry.symbol
+
+    const totalCost = entry.quantity * entry.initialPrice
+
+    const currentValue = entry.quantity * currentPrice
+
+    const gainLoss = currentValue - totalCost
+    const gainLossPercent = totalCost === 0 ? 0 : Math.round((gainLoss / totalCost) * 100)
 
     return {
       ...entry,
-      currentPrice: quote?.price ?? 0,
-      company: quote?.name ?? entry.symbol,
+      company,
+      currentPrice,
+      totalCost,
+      currentValue,
+      gainLoss,
+      gainLossPercent,
     }
   })
 }
+
