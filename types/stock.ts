@@ -23,3 +23,13 @@ export interface SearchResult {
   type: string   // Asset type (e.g., 'Stock', 'ETF')
   region: string // Geographic market region (e.g., 'US', 'EU')
 }
+
+/**
+ * Live stock price structure used in portfolio rendering.
+ * ontains stock symbol, current price, and company name.
+ */
+export interface LiveQuote {
+  symbol: string
+  currentPrice: number
+  company?: string
+}
