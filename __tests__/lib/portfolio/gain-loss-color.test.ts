@@ -1,12 +1,12 @@
-import { getGainLossColor } from '@/lib/portfolio/gain-loss-color'
+import getGainLossColor from "@/lib/portfolio/gain-loss-color"
 
 describe('getGainLossColor', () => {
   it('returns green for profit', () => {
-    expect(getGainLossColor(100)).toBe('green') // Positive gain
+    expect(getGainLossColor(100)).toBe('#00ff00') // Positive gain
   })
 
   it('returns red for loss', () => {
-    expect(getGainLossColor(-50)).toBe('red') // Negative gain/loss
+    expect(getGainLossColor(-50)).toBe('#ff4444') // Negative gain/loss
   })
 
   it('returns gray for zero', () => {
