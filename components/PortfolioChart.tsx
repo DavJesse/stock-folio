@@ -62,7 +62,7 @@ export default function PortfolioChart({ data }: Props) {
             {/* Tooltip shows exact dollar value and company name on hover */}
             <Tooltip
               formatter={(value, name, entry) => {
-                return [`${Number(value).toLocaleString()}`, entry.payload.name]
+                return [`\$${Number(value).toLocaleString()}`, entry.payload.name]
               }}
               contentStyle={{
                 backgroundColor: 'rgba(31, 42, 70, 0.8)',
