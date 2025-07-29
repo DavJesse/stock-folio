@@ -602,3 +602,55 @@ paths:
                     type: string
                     example: Internal server error
 
+  /api/portfolio:
+    get:
+      tags:
+        - Portfolio
+      summary: Get user portfolio
+      description: |
+        Returns the current portfolio (stocks owned) for the authenticated user.
+      security:
+        - cookieAuth: []  # Session-based auth using cookie
+      responses:
+        '200':
+          description: Successful portfolio retrieval
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    symbol:
+                      type: string
+                      description: Stock symbol (e.g., AAPL, TSLA)
+                      example: AAPL
+                    quantity:
+                      type: integer
+                      description: Number of shares held
+                      example: 10
+                    initialPrice:
+                      type: number
+                      format: float
+                      description: Average purchase price of the stock
+                      example: 150.25
+        '401':
+          description: Unauthorized - User not logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+        '500':
+          description: Internal server error while retrieving portfolio
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Internal Server Error
