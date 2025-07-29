@@ -5,8 +5,8 @@ jest.mock('@/lib/security/validate-csrf', () => ({
   validateCsrf: jest.fn(),
 }));
 
-jest.mock('@/lib/security/verify-token', () => ({
-  verifyTokenFromRequest: jest.fn(),
+jest.mock('@/lib/security/get-user-from-session-cookie', () => ({
+  getUserFromSessionCookie: jest.fn(),
 }));
 
 jest.mock('@/lib/transactions/sell', () => ({
@@ -14,7 +14,7 @@ jest.mock('@/lib/transactions/sell', () => ({
 }));
 
 import { validateCsrf } from '@/lib/security/validate-csrf';
-import { verifyTokenFromRequest } from '@/lib/security/verify-token';
+import { getUserFromSessionCookie } from '@/lib/security/get-user-from-session-cookie';
 import { sellStock } from '@/lib/transactions/sell';
 
 // Patch: Replace NextResponse.json with full Response implementation
@@ -77,7 +77,7 @@ describe('POST /api/transactions/sell', () => {
 
   it('returns 401 if user is not authenticated', async () => {
     (validateCsrf as jest.Mock).mockResolvedValue(true);
-    (verifyTokenFromRequest as jest.Mock).mockResolvedValue(null);
+    (getUserFromSessionCookie as jest.Mock).mockResolvedValue(null);
 
     const req = mockRequest({});
     const res = await POST(req);
@@ -88,7 +88,7 @@ describe('POST /api/transactions/sell', () => {
 
   it('returns 400 if request body is invalid JSON', async () => {
     (validateCsrf as jest.Mock).mockResolvedValue(true);
-    (verifyTokenFromRequest as jest.Mock).mockResolvedValue({ sub: 'user-id' });
+    (getUserFromSessionCookie as jest.Mock).mockResolvedValue({ sub: 'user-id' });
 
     // Simulate invalid JSON body
     const invalidJsonRequest = {
@@ -105,7 +105,7 @@ describe('POST /api/transactions/sell', () => {
 
   it('returns 400 if symbol or quantity is missing', async () => {
     (validateCsrf as jest.Mock).mockResolvedValue(true);
-    (verifyTokenFromRequest as jest.Mock).mockResolvedValue({ sub: 'user-id' });
+    (getUserFromSessionCookie as jest.Mock).mockResolvedValue({ sub: 'user-id' });
 
     // Quantity is missing
     const req = mockRequest({ symbol: 'AAPL', price: 150 });
@@ -117,7 +117,7 @@ describe('POST /api/transactions/sell', () => {
 
   it('returns 200 on successful sale', async () => {
     (validateCsrf as jest.Mock).mockResolvedValue(true);
-    (verifyTokenFromRequest as jest.Mock).mockResolvedValue({ sub: 'user-id' });
+    (getUserFromSessionCookie as jest.Mock).mockResolvedValue({ sub: 'user-id' });
     (sellStock as jest.Mock).mockResolvedValue({ success: true });
 
     const req = mockRequest({ symbol: 'AAPL', quantity: 10, price: 150 });
@@ -129,7 +129,7 @@ describe('POST /api/transactions/sell', () => {
 
   it('returns 500 on internal error', async () => {
     (validateCsrf as jest.Mock).mockResolvedValue(true);
-    (verifyTokenFromRequest as jest.Mock).mockResolvedValue({ sub: 'user-id' });
+    (getUserFromSessionCookie as jest.Mock).mockResolvedValue({ sub: 'user-id' });
     (sellStock as jest.Mock).mockRejectedValue(new Error('Something went wrong'));
 
     const req = mockRequest({ symbol: 'AAPL', quantity: 10, price: 150 });
