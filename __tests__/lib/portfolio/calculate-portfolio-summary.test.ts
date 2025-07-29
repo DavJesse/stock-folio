@@ -1,4 +1,4 @@
-import { calculatePortfolioSummary } from '@/lib/portfolio/calculate-portfolio-summary'
+import calculatePortfolioSummary from '@/lib/portfolio/calculate-portfolio-summary'
 
 describe('calculatePortfolioSummary', () => {
   // Handles empty portfolio
