@@ -1,5 +1,4 @@
 import { setSessionCookie } from '@/lib/security/set-session-cookie'
-import jwt from 'jsonwebtoken'
 import { cookies } from 'next/headers'
 
 // Mock cookies function from next/headers
@@ -26,17 +25,15 @@ describe('setSessionCookie', () => {
     process.env = originalEnv
   })
 
-  it('should sign a JWT and set it as a cookie', async () => {
+  it('should set the user ID as a cookie', async () => {
     const userId = '123'
 
     await setSessionCookie(userId)
 
     const [name, value, options] = mockSet.mock.calls[0]
-    const decoded = jwt.verify(value, 'test-secret') as { id: number }
 
-    // Validate cookie options
     expect(name).toBe('token')
-    expect(decoded.id).toBe(userId)
+    expect(value).toBe(userId)
     expect(options).toMatchObject({
       httpOnly: true,
       secure: false,
