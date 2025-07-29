@@ -22,7 +22,7 @@ export function createSession(userId: number): string {
  * Gets the user ID associated with a session ID.
  * Returns undefined if not found or expired.
  */
-export function getUserIdFromSession(sessionId: string): number | undefined {
+export async function getUserIdFromSession(sessionId: string): Promise<number | undefined> {
   const row = db.prepare(`
     SELECT user_id FROM sessions
     WHERE id = ? AND expires_at > datetime('now')
