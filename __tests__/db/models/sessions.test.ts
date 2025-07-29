@@ -34,23 +34,23 @@ describe('session model', () => {
     expect(row.user_id).toBe(testUserId)
   })
 
-  it('getUserIdFromSession should return the correct user_id', () => {
+  it('getUserIdFromSession should return the correct user_id', async () => {
     const sessionId = createSession(testUserId)
 
-    const result = getUserIdFromSession(sessionId)
+    const result = await getUserIdFromSession(sessionId)
     expect(result).toBe(testUserId)
   })
 
-  it('getUserIdFromSession should return undefined for expired session', () => {
+  it('getUserIdFromSession should return undefined for expired session', async () => {
     const sessionId = randomUUID()
-
+  
     // Insert expired session manually
     db.prepare(`
       INSERT INTO sessions (id, user_id, created_at, expires_at)
       VALUES (?, ?, datetime('now'), datetime('now', '-1 day'))
     `).run(sessionId, testUserId)
-
-    const result = getUserIdFromSession(sessionId)
+    
+    const result = await getUserIdFromSession(sessionId)
     expect(result).toBeUndefined()
   })
 
