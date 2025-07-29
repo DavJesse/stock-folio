@@ -654,3 +654,68 @@ paths:
                   error:
                     type: string
                     example: Internal Server Error
+
+  /api/stocks/quotes:
+    get:
+      summary: Fetch current stock prices and company names
+      description: >
+        Returns the current price and company name for each symbol passed
+        as a comma-separated `symbols` query parameter. Requires a valid session cookie.
+      tags:
+        - Stocks
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Comma-separated list of stock symbols to fetch quotes for (e.g., AAPL,MSFT,GOOG)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully fetched stock quotes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    symbol:
+                      type: string
+                      example: AAPL
+                    price:
+                      type: number
+                      example: 189.58
+                    name:
+                      type: string
+                      example: Apple Inc.
+        '400':
+          description: Missing symbols query parameter
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing symbols parameter
+        '401':
+          description: Unauthorized (no valid session cookie)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+        '500':
+          description: Internal error (e.g., API key not set or fetch failed)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to fetch stock data
