@@ -30,6 +30,6 @@ export interface SearchResult {
  */
 export interface LiveQuote {
   symbol: string
-  currentPrice: number
+  price: number
   company?: string
 }
