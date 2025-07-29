@@ -20,30 +20,28 @@ describe('getUserFromSessionCookie', () => {
     })
   }
 
-  it('returns userId if session is valid', () => {
-    // @ts-expect-error — we’re mocking a sync function
-    getUserIdFromSession.mockReturnValue(456)
+  it('returns userId if session is valid', async () => {
+    (getUserIdFromSession as jest.Mock).mockResolvedValue(456)
 
     const req = createMockRequestWithCookie(mockSessionId)
-    const result = getUserFromSessionCookie(req)
+    const result = await getUserFromSessionCookie(req)
 
     expect(result).toEqual({ userId: 456 })
     expect(getUserIdFromSession).toHaveBeenCalledWith(mockSessionId)
   })
 
-  it('returns undefined if no token cookie is present', () => {
+  it('returns undefined if no token cookie is present', async () => {
     const req = new NextRequest('http://localhost')
-    const result = getUserFromSessionCookie(req)
+    const result = await getUserFromSessionCookie(req)
 
     expect(result).toBeUndefined()
   })
 
-  it('returns undefined if session is invalid', () => {
-    // @ts-expect-error — mocking undefined session result
-    getUserIdFromSession.mockReturnValue(undefined)
+  it('returns undefined if session is invalid', async () => {
+    (getUserIdFromSession as jest.Mock).mockResolvedValue(undefined)
 
     const req = createMockRequestWithCookie('invalid-session-id')
-    const result = getUserFromSessionCookie(req)
+    const result = await getUserFromSessionCookie(req)
 
     expect(result).toBeUndefined()
   })
