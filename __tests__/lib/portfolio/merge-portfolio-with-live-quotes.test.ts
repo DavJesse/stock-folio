@@ -1,8 +1,7 @@
-import { mergePortfolioWithLiveQuotes } from '@/lib/portfolio/merge-portfolio-with-live-quotes'
+import mergePortfolioWithLiveQuotes from '@/lib/portfolio/merge-portfolio-with-live-quotes'
 
 describe('mergePortfolioWithLiveQuotes', () => {
   it('merges portfolio and live data correctly', () => {
-    // Setup: Portfolio data and corresponding live data
     const portfolio = [
       { symbol: 'AAPL', quantity: 10, initialPrice: 100 },
       { symbol: 'TSLA', quantity: 5, initialPrice: 200 },
@@ -13,10 +12,8 @@ describe('mergePortfolioWithLiveQuotes', () => {
       { symbol: 'TSLA', price: 180, name: 'Tesla Inc.' },
     ]
 
-    // Action: Merge portfolio with live quote data
     const result = mergePortfolioWithLiveQuotes(portfolio, liveData)
 
-    // Assertion: Each merged item contains current price and company name from live data
     expect(result).toEqual([
       {
         symbol: 'AAPL',
@@ -24,6 +21,10 @@ describe('mergePortfolioWithLiveQuotes', () => {
         initialPrice: 100,
         currentPrice: 150,
         company: 'Apple Inc.',
+        totalCost: 1000,
+        currentValue: 1500,
+        gainLoss: 500,
+        gainLossPercent: 50,
       },
       {
         symbol: 'TSLA',
@@ -31,20 +32,32 @@ describe('mergePortfolioWithLiveQuotes', () => {
         initialPrice: 200,
         currentPrice: 180,
         company: 'Tesla Inc.',
+        totalCost: 1000,
+        currentValue: 900,
+        gainLoss: -100,
+        gainLossPercent: -10,
       },
     ])
   })
 
   it('handles missing live data gracefully', () => {
-    // Setup: Portfolio contains one item, live data is empty
     const portfolio = [{ symbol: 'AAPL', quantity: 10, initialPrice: 100 }]
     const liveData: { symbol: string; price: number; name?: string }[] = []
 
-    // Action: Merge with no live data available
     const result = mergePortfolioWithLiveQuotes(portfolio, liveData)
 
-    // Assertion: Fallbacks to symbol for company name and zero for price
-    expect(result[0].currentPrice).toBe(0)
-    expect(result[0].company).toBe('AAPL')
+    expect(result).toEqual([
+      {
+        symbol: 'AAPL',
+        quantity: 10,
+        initialPrice: 100,
+        currentPrice: 0,
+        company: 'AAPL', // fallback to symbol
+        totalCost: 1000,
+        currentValue: 0,
+        gainLoss: -1000,
+        gainLossPercent: -100,
+      },
+    ])
   })
 })
