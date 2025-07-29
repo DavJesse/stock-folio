@@ -19,7 +19,7 @@ interface PortfolioSummary {
  * - totalValue: quantity * currentPrice
  * - totalGainLoss: totalValue - totalCost
  */
-export function calculatePortfolioSummary(portfolio: PortfolioItem[]): PortfolioSummary {
+export default function calculatePortfolioSummary(portfolio: PortfolioItem[]): PortfolioSummary {
   return portfolio.reduce<PortfolioSummary>(
     (summary, item) => {
       const { quantity, initialPrice, currentPrice } = item
