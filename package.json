@@ -16,6 +16,7 @@
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.2.0",
     "canvas-confetti": "^1.9.3",
+    "date-fns": "^4.1.0",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "lodash.debounce": "^4.0.8",
