@@ -11,8 +11,6 @@ import {
   BarChart,
   Wallet,
   DollarSign,
-  Users,
-  HelpCircle,
   LogOut,
   Menu,
   X,
@@ -94,18 +92,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </ul>
             </div>
 
-            {/* Support menu */}
+            {/* Accounts menu */}
             <div>
-              <h2 className="text-white font-bold mt-6 px-2">SUPPORT</h2>
+              <h2 className="text-white font-bold mt-6 px-2">ACCOUNT BALANCE</h2>
               <ul className="space-y-2 mt-2">
                 <li>
                   <a href="#" className="flex items-center gap-2 text-white px-2 py-1">
-                    <Users size={18} /> Community
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="flex items-center gap-2 text-white px-2 py-1">
-                    <HelpCircle size={18} /> Help & Support
+                    <DollarSign size={18} /> Bal:
                   </a>
                 </li>
               </ul>
