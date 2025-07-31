@@ -3,7 +3,9 @@
 // Imports
 import { useState, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAccountBalance } from '@/hooks/use-account-balance'
 import DemoPopup from '@/components/DemoPopup'
+import formatCurrency from '@/lib/format/format-currency'
 
 // Icons
 import {
@@ -25,6 +27,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { balance, loading } = useAccountBalance()
 
   // Handle logout and redirect to home
   const handleLogout = async () => {
@@ -97,9 +100,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <h2 className="text-white font-bold mt-6 px-2">ACCOUNT BALANCE</h2>
               <ul className="space-y-2 mt-2">
                 <li>
-                  <a href="#" className="flex items-center gap-2 text-white px-2 py-1">
-                    <DollarSign size={18} /> Bal:
-                  </a>
+                  <div className="flex items-center gap-2 font-bold text-[20px] text-[var(--success-color)] px-4">
+                    {loading ? 'Loading...' : formatCurrency(balance ?? 0)}
+                  </div>
                 </li>
               </ul>
             </div>
