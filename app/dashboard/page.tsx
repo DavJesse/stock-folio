@@ -1,66 +1,39 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import PortfolioOverview from '@/components/PortfolioOverview'
-import TransactionHistoryTable from '@/components/TransactionTable'
-import { TransactionRow } from '@/types/transaction'
+import StockSearchBarLarge from "@/components/LargeSearchBar"
 
 export default function DashboardPage() {
-  const [transactions, setTransactions] = useState<TransactionRow[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalCount, setTotalCount] = useState(0)
-  
-  const limit = 10 // Number of transactions per page
-
-  // Fetches a page of transaction history from the API
-  const fetchTransactions = async (page: number) => {
-    setIsLoading(true)
-    try {
-      const offset = (page - 1) * limit // Calculate offset for pagination
-      const res = await fetch(`/api/transactions/history?limit=${limit}&offset=${offset}`, {
-        cache: 'no-store', // Ensure fresh data on each request
-      })
-      
-      if (!res.ok) {
-        throw new Error('Failed to fetch transactions')
-      }
-      
-      const data = await res.json()
-      setTransactions(data.transactions || []) // Fallback to empty array if undefined
-      setTotalCount(data.total || 0)
-    } catch (error) {
-      console.error('Failed to fetch transactions:', error)
-      setTransactions([])
-      setTotalCount(0)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Fetch transactions whenever the page changes
-  useEffect(() => {
-    fetchTransactions(currentPage)
-  }, [currentPage])
-
-  // Handles user pagination interaction
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-  }
-
   return (
-    <div>
-      <h1 className="flex flex-col gap-7 text-2xl text-white font-bold mt-10 lg:mt-0">
-        Welcome to your Dashboard
-      </h1>
-      <PortfolioOverview />
-      <TransactionHistoryTable
-        transactions={transactions}
-        isLoading={isLoading}
-        currentPage={currentPage}
-        totalCount={totalCount}
-        onPageChange={handlePageChange}
-      />
+    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+      {/* Prominent heading - Google-style */}
+      <div className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white mb-4 tracking-tight">
+          Search your stock,
+        </h1>
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white mb-8 tracking-tight">
+          <span className="text-blue-400">start trading</span>...
+        </h1>
+      </div>
+      
+      {/* Large Search Bar */}
+      <div className="w-full max-w-4xl">
+        <StockSearchBarLarge />
+      </div>
+      
+      {/* Optional: Quick suggestions or popular stocks */}
+      {/* <div className="mt-16 text-center">
+        <p className="text-gray-500 text-sm mb-4">Popular searches:</p>
+        <div className="flex flex-wrap justify-center gap-3">
+          {['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN', 'NVDA'].map((symbol) => (
+            <button
+              key={symbol}
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white rounded-full text-sm transition-all duration-200 hover:scale-105"
+            >
+              {symbol}
+            </button>
+          ))}
+        </div>
+      </div> */}
     </div>
   )
 }
