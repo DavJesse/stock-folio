@@ -56,9 +56,11 @@ test.describe('E2E: Stock search', () => {
     await searchInput.fill('aApL')
 
     // Wait for dropdown result to load
-    await page.waitForTimeout(500)
+    await page.waitForTimeout(600)
 
     // Check that correct stock appears
-    await expect(page.getByText(/AAPL\s+-\s+APPLE INC/i)).toBeVisible()
+    await expect(
+  page.getByRole('link', { name: /AAPL APPLE INC COMMON STOCK/i })
+).toBeVisible()
   })
 })
