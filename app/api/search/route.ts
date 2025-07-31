@@ -46,10 +46,9 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await res.json()
-
     // Return successful result from the API
-    return NextResponse.json(data, { status: 200 })
-
+    return NextResponse.json({ result: data.result || [] }, { status: 200 })
+    
   } catch (error) {
     // Log and return internal error
     console.error('Error fetching stock data:', error)
