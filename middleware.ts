@@ -15,6 +15,16 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/', req.url))
   }
 
+  // If user is not logged in and tries to access '/dashboard/transactions', redirect to '/'
+  if (pathname === '/dashboard/transactions' && !token) {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
+
+  // If user is not logged in and tries to access '/dashboard/portfolio', redirect to '/'
+  if (pathname === '/dashboard/portfolio' && !token) {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
+
   // Otherwise allow the request to continue
   return NextResponse.next()
 }
