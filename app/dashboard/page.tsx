@@ -21,19 +21,19 @@ export default function DashboardPage() {
       </div>
       
       {/* Optional: Quick suggestions or popular stocks */}
-      {/* <div className="mt-16 text-center">
+      <div className="mt-16 text-center">
         <p className="text-gray-500 text-sm mb-4">Popular searches:</p>
         <div className="flex flex-wrap justify-center gap-3">
           {['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN', 'NVDA'].map((symbol) => (
-            <button
+            <div
               key={symbol}
-              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white rounded-full text-sm transition-all duration-200 hover:scale-105"
+              className="px-4 py-2 bg-white/5 text-gray-300 rounded-full text-sm transition-all duration-200"
             >
               {symbol}
-            </button>
+            </div>
           ))}
         </div>
-      </div> */}
+      </div>
     </div>
   )
 }
