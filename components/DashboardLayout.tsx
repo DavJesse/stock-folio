@@ -3,7 +3,6 @@
 // Imports
 import { useState, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import StockSearchBar from '@/components/SearchBar'
 import DemoPopup from '@/components/DemoPopup'
 
 // Icons
@@ -73,18 +72,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <h2 className="text-white font-bold px-2">MAIN MENU</h2>
               <ul className="space-y-2 mt-2">
                 <li>
-                  <a href="#" className="flex items-center gap-2 text-white px-2 py-1">
+                  <a href="/dashboard" className="flex items-center gap-2 text-white px-2 py-1">
                     <Home size={18} /> Home
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="flex items-center gap-2 text-white px-2 py-1">
-                    <BarChart size={18} /> Exchange
+                  <a href="/dashboard/portfolio" className="flex items-center gap-2 text-white px-2 py-1">
+                    <BarChart size={18} /> Portfolio Summary
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="flex items-center gap-2 text-white px-2 py-1">
-                    <Wallet size={18} /> Wallets
+                  <a href="/dashboard/transactions" className="flex items-center gap-2 text-white px-2 py-1">
+                    <Wallet size={18} /> Transactions
                   </a>
                 </li>
                 <li>
@@ -128,7 +127,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content area */}
       <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto w-full">
         <DemoPopup /> {/* Render DemoPopup if localStorage has demoMessage */}
-        <StockSearchBar /> {/* Render search bar at the top */}
         {children}
       </main>
     </div>
