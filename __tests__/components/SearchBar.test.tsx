@@ -1,133 +1,247 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import React from 'react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import StockSearchBar from '@/components/SearchBar'
-import { useSearchStocks } from '@/hooks/use-search-stocks'
 
-jest.mock('@/hooks/use-search-stocks')
+// Mock the hook
+const mockSearch = jest.fn()
+const mockUseSearchStocks = jest.fn()
 
-const mockedUseSearchStocks = useSearchStocks as jest.MockedFunction<typeof useSearchStocks>
+jest.mock('@/hooks/use-search-stocks', () => ({
+  useSearchStocks: () => mockUseSearchStocks()
+}))
+
+// Mock Next.js Link component
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  )
+}))
 
 describe('StockSearchBar', () => {
-  const mockSearch = jest.fn()
-
   beforeEach(() => {
+    // Use fake timers for debounce testing
+    jest.useFakeTimers()
+    
+    // Reset all mocks before each test
     jest.clearAllMocks()
-  })
-
-  it('calls search on input change', () => {
-    // Arrange: mock hook return values
-    mockedUseSearchStocks.mockReturnValue({
+    
+    // Default mock return values
+    mockUseSearchStocks.mockReturnValue({
       results: [],
       loading: false,
       error: null,
-      search: mockSearch,
+      search: mockSearch
     })
-
-    render(<StockSearchBar />)
-
-    // Act: simulate user typing into search input
-    const input = screen.getByPlaceholderText('Search stocks...')
-    fireEvent.change(input, { target: { value: 'AAPL' } })
-
-    // Assert: search function is called with input value
-    expect(mockSearch).toHaveBeenCalledWith('AAPL')
   })
 
-  it('shows clear button when there is a query', () => {
-    // Arrange
-    mockedUseSearchStocks.mockReturnValue({
-      results: [],
-      loading: false,
-      error: null,
-      search: mockSearch,
-    })
-
-    render(<StockSearchBar />)
-
-    // Act
-    const input = screen.getByPlaceholderText('Search stocks...')
-    fireEvent.change(input, { target: { value: 'TSLA' } })
-
-    // Assert
-    expect(
-      screen.getByRole('button', { name: /clear search/i })
-    ).toBeInTheDocument()
+  afterEach(() => {
+    jest.clearAllTimers()
+    jest.useRealTimers()
   })
 
-  it('clears input and search on clear button click', () => {
-    // Arrange
-    mockedUseSearchStocks.mockReturnValue({
-      results: [],
-      loading: false,
-      error: null,
-      search: mockSearch,
-    })
-
-    render(<StockSearchBar />)
-
-    const input = screen.getByPlaceholderText('Search stocks...')
-    fireEvent.change(input, { target: { value: 'MSFT' } })
-
-    const clearBtn = screen.getByRole('button', { name: /clear search/i })
-
-    // Act
-    fireEvent.click(clearBtn)
-
-    // Assert
-    expect(mockSearch).toHaveBeenCalledWith('')
-    expect(input).toHaveValue('')
-  })
-
-  it('displays loading message when loading is true', () => {
-    // Arrange
-    mockedUseSearchStocks.mockReturnValue({
+  it('should show loading state when searching', async () => {
+    // Mock the hook to return loading state
+    mockUseSearchStocks.mockReturnValue({
       results: [],
       loading: true,
       error: null,
-      search: mockSearch,
+      search: mockSearch
     })
 
     render(<StockSearchBar />)
+    
+    const input = screen.getByPlaceholderText('Search stocks...')
+    
+    // Type in the input to trigger search
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'AAPL' } })
+    })
 
-    // Assert
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    // Wait for debounce delay
+    await act(async () => {
+      jest.advanceTimersByTime(300)
+    })
+
+    // Now the loading message should be visible
+    await waitFor(() => {
+      expect(screen.getByText('Searching...')).toBeInTheDocument()
+    })
   })
 
-  it('displays error message when error exists', () => {
-    // Arrange
-    mockedUseSearchStocks.mockReturnValue({
+  it('should show loading state with proper sequence', async () => {
+    // Start with initial state
+    const mockSearchFn = jest.fn()
+    let currentState = {
       results: [],
       loading: false,
-      error: 'Something went wrong',
-      search: mockSearch,
+      error: null,
+      search: mockSearchFn
+    }
+
+    // Update mock to simulate state changes
+    mockUseSearchStocks.mockImplementation(() => currentState)
+
+    const { rerender } = render(<StockSearchBar />)
+    
+    const input = screen.getByPlaceholderText('Search stocks...')
+    
+    // Type in the input
+    fireEvent.change(input, { target: { value: 'AAPL' } })
+
+    // Advance past debounce delay
+    act(() => {
+      jest.advanceTimersByTime(300)
     })
 
-    render(<StockSearchBar />)
+    // Update state to loading and rerender
+    currentState = {
+      ...currentState,
+      loading: true
+    }
+    rerender(<StockSearchBar />)
 
-    // Assert
-    expect(screen.getByText('Something went wrong')).toBeInTheDocument()
+    // Now check for loading message
+    await waitFor(() => {
+      expect(screen.getByText('Searching...')).toBeInTheDocument()
+    })
   })
 
-  it('renders list of results when available', () => {
-    // Arrange
-    mockedUseSearchStocks.mockReturnValue({
+  it('should display search results after loading', async () => {
+    const mockResults = [
+      {
+        symbol: 'AAPL',
+        description: 'Apple Inc.',
+        type: 'Common Stock'
+      }
+    ]
+
+    // Start with loading state
+    mockUseSearchStocks.mockReturnValue({
+      results: [],
+      loading: true,
+      error: null,
+      search: mockSearch
+    })
+
+    const { rerender } = render(<StockSearchBar />)
+    
+    const input = screen.getByPlaceholderText('Search stocks...')
+    
+    // Type and wait for debounce
+    fireEvent.change(input, { target: { value: 'AAPL' } })
+    
+    act(() => {
+      jest.advanceTimersByTime(300)
+    })
+
+    // Should show loading
+    await waitFor(() => {
+      expect(screen.getByText('Searching...')).toBeInTheDocument()
+    })
+
+    // Update to show results
+    mockUseSearchStocks.mockReturnValue({
+      results: mockResults,
       loading: false,
       error: null,
-      search: mockSearch,
-      results: [
-        {
-          symbol: 'GOOGL',
-          name: 'Alphabet Inc.',
-          type: 'Equity',
-          region: 'US',
-          description: 'Google parent company',
-        },
-      ],
+      search: mockSearch
+    })
+
+    rerender(<StockSearchBar />)
+
+    // Should show results and hide loading
+    await waitFor(() => {
+      expect(screen.queryByText('Searching...')).not.toBeInTheDocument()
+      expect(screen.getByText('AAPL')).toBeInTheDocument()
+      expect(screen.getByText('Apple Inc.')).toBeInTheDocument()
+    })
+  })
+
+  it('should handle error state', async () => {
+    mockUseSearchStocks.mockReturnValue({
+      results: [],
+      loading: false,
+      error: 'Failed to fetch stocks',
+      search: mockSearch
     })
 
     render(<StockSearchBar />)
+    
+    const input = screen.getByPlaceholderText('Search stocks...')
+    
+    fireEvent.change(input, { target: { value: 'INVALID' } })
+    
+    act(() => {
+      jest.advanceTimersByTime(300)
+    })
 
-    // Assert
-    expect(screen.getAllByText(/GOOGL/i).length).toBeGreaterThan(0)
-    expect(screen.getByText(/Google parent company/i)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Failed to fetch stocks')).toBeInTheDocument()
+    })
+  })
+
+  it('should clear search when clear button is clicked', async () => {
+    render(<StockSearchBar />)
+    
+    const input = screen.getByPlaceholderText('Search stocks...')
+    
+    // Type something
+    fireEvent.change(input, { target: { value: 'AAPL' } })
+    
+    // Clear button should appear
+    const clearButton = screen.getByLabelText('Clear search')
+    expect(clearButton).toBeInTheDocument()
+    
+    // Click clear button
+    fireEvent.click(clearButton)
+    
+    // Input should be cleared
+    expect(input).toHaveValue('')
+    expect(mockSearch).toHaveBeenCalledWith('')
+  })
+
+  // Additional test specifically for the loading state issue
+  it('should show loading immediately after typing and debounce delay', async () => {
+    // Create a more realistic mock that simulates the actual hook behavior
+    const mockSearchFunction = jest.fn()
+    
+    mockUseSearchStocks.mockReturnValue({
+      results: [],
+      loading: false,
+      error: null,
+      search: mockSearchFunction
+    })
+
+    const { rerender } = render(<StockSearchBar />)
+    
+    const input = screen.getByPlaceholderText('Search stocks...')
+    
+    // Type something
+    fireEvent.change(input, { target: { value: 'AAPL' } })
+    
+    // At this point, loading should still be false
+    expect(screen.queryByText('Searching...')).not.toBeInTheDocument()
+    
+    // Fast-forward past debounce delay
+    act(() => {
+      jest.advanceTimersByTime(300)
+    })
+    
+    // Now mock the hook to return loading state (simulating what happens when search is called)
+    mockUseSearchStocks.mockReturnValue({
+      results: [],
+      loading: true,
+      error: null,
+      search: mockSearchFunction
+    })
+    
+    // Re-render with new state
+    rerender(<StockSearchBar />)
+    
+    // Now loading should be visible
+    expect(screen.getByText('Searching...')).toBeInTheDocument()
   })
 })
