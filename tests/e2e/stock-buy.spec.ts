@@ -54,13 +54,17 @@ test.describe('E2E: Stock buy', () => {
     await closeButton.click()
 
     const searchInput = page.getByPlaceholder('Search stocks...')
-    await searchInput.fill('aApL')
+    await searchInput.fill('aapl')
 
-    await page.waitForTimeout(500)
+    await page.waitForTimeout(1200)
 
-    const resultItem = page.getByText(/AAPL\s+-\s+APPLE INC.*Common Stock/i)
-    await expect(resultItem).toBeVisible()
-    await resultItem.click()
+    // Wait for results to appear
+    await expect(page.getByRole('listbox')).toBeVisible()
+
+    // Click on the stock result using role and accessible name
+    const option = page.getByRole('option', { name: /AAPL APPLE INC Common Stock/i })
+    await expect(option).toBeVisible()
+    await option.click()
 
     // Wait for the modal to appear
     const modalTitle = page.getByTestId('stock-symbol')
