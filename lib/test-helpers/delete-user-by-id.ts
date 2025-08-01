@@ -17,6 +17,7 @@ export default function deleteUserByUserId(userId: number) {
 
   // Step 2: Prepare deletion statements for related data
   const deleteTransactionsStmt = db.prepare('DELETE FROM transactions WHERE user_id = ?')
+  const deletePortfolioStmt = db.prepare('DELETE FROM portfolio WHERE user_id = ?')
   const deleteAccountsStmt = db.prepare('DELETE FROM accounts WHERE user_id = ?')
   const deleteSessionsStmt = db.prepare('DELETE FROM sessions WHERE user_id = ?')
   const deleteUserStmt = db.prepare('DELETE FROM users WHERE id = ?')
@@ -24,11 +25,17 @@ export default function deleteUserByUserId(userId: number) {
   // Step 3: Execute all deletions in a single atomic transaction
   const transaction = db.transaction((id: number) => {
     deleteTransactionsStmt.run(id)
+    deletePortfolioStmt.run(id)
     deleteAccountsStmt.run(id)
     deleteSessionsStmt.run(id)
     deleteUserStmt.run(id)
   })
 
   // Step 4: Run the transaction
-  transaction(userId)
+  try {
+    transaction(userId)
+  } catch (error) {
+    console.error('Error deleting user by ID:', error)
+    throw error // Re-throw to allow caller to handle if needed
+  }
 }
