@@ -60,10 +60,19 @@ export async function handleSignup(
       VALUES (?, ?, datetime('now', 'localtime'), datetime('now', 'localtime'))
     `)
 
+    const insertTransactionStmt = db.prepare(`
+      INSERT INTO transactions (user_id, symbol, quantity, price, type, created_at)
+      VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'))
+    `)
+
     const transaction = db.transaction(() => {
       const userResult = insertUserStmt.run(email, passwordHash)
       userId = userResult.lastInsertRowid as number
+      
       insertAccountStmt.run(userId, 10_000)
+
+      // Insert initial $10,000 deposit into transactions table
+      insertTransactionStmt.run(userId, 'CASH', 1, 10000, 'deposit')
     })
 
     transaction()
