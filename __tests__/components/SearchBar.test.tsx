@@ -244,4 +244,22 @@ describe('StockSearchBar', () => {
     // Now loading should be visible
     expect(screen.getByText('Searching...')).toBeInTheDocument()
   })
+
+  it('calls search on input change after debounce', async () => {
+  render(<StockSearchBar />)
+
+  const input = screen.getByPlaceholderText('Search stocks...')
+
+  // Type in the input
+  fireEvent.change(input, { target: { value: 'AAPL' } })
+
+  // Advance the timers to pass debounce (adjust if you use a different delay)
+  act(() => {
+    jest.advanceTimersByTime(300)
+  })
+
+  await waitFor(() => {
+    expect(mockSearch).toHaveBeenCalledWith('AAPL')
+  })
+})
 })
