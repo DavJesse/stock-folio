@@ -15,7 +15,6 @@ export default function HomePage() {
   useEffect(() => {
     const token = Cookies.get('token')
     if (token) {
-      console.log('User already authenticated, redirecting to dashboard...')
       router.replace('/dashboard')
     }
   }, [router])

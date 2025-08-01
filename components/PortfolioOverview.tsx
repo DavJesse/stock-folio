@@ -31,7 +31,6 @@ async function fetchUserPortfolio(): Promise<PortfolioEntry[]> {
 }
 
 async function fetchLiveQuotes(symbols: string[]): Promise<LiveQuote[]> {
-    console.log('symbols:', symbols)
   const res = await fetch(`/api/quotes?symbols=${symbols.join(',')}`)
   return res.json()
 }

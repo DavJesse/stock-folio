@@ -95,11 +95,6 @@ describe('handleSignup', () => {
       password: plainPassword,
     })
 
-    // Add debugging
-    if (res.status !== 201) {
-      console.log('Unexpected response in hash test:', res)
-    }
-
     expect(res.status).toBe(201)
 
     const user = db
