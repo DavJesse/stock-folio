@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     symbol TEXT NOT NULL,                       -- Stock symbol involved in the transaction
     quantity INTEGER NOT NULL,                  -- Number of shares bought or sold
     price REAL NOT NULL,                        -- Price per share at time of transaction
-    type TEXT NOT NULL CHECK (type IN ('buy', 'sell')), -- Transaction type
+    type TEXT NOT NULL CHECK (type IN ('buy', 'sell', 'deposit')), -- Transaction type
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
