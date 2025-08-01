@@ -5,7 +5,7 @@ import db from '@/lib/db'
  */
 type Transaction = {
   user_id: number
-  type: 'buy' | 'sell'
+  type: 'buy' | 'sell' | 'deposit'
   symbol: string
   quantity: number
   price: number
