@@ -16,12 +16,15 @@ describe('sellStock', () => {
   const quantity = 5
   const price = 200
   const totalValue = quantity * price
-  const now = new Date()
+  const now = new Date().toISOString()
 
   const user = {
     id: 123,
     email: 'test@example.com',
     password_hash: 'hashed_pw',
+    first_name: 'John',
+    last_name: 'Doe',
+    image: '',
     created_at: now,
   }
 

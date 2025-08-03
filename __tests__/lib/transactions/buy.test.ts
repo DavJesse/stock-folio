@@ -4,6 +4,7 @@ import * as accountModel from '@/db/models/accounts'
 import * as portfolioModel from '@/db/models/portfolio'
 import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
 import deleteUserByUserId from '@/lib/test-helpers/delete-user-by-id'
+import { User } from '@/types/user'
 
 // Mock dependent modules to isolate the buyStock logic
 jest.mock('@/db/models/accounts')
@@ -14,12 +15,15 @@ describe('buyStock', () => {
   const quantity = 10
   const price = 150
   const totalCost = quantity * price
-  const now = new Date()
+  const now = new Date().toISOString()
 
-  const user = {
+  const user: User = {
     id: 123,
     email: 'test@example.com',
     password_hash: 'hashed_pw',
+    first_name: 'John',
+    last_name: 'Doe',
+    image: '',
     created_at: now,
   }
 
