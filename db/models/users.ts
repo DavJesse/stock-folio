@@ -1,14 +1,5 @@
 import db from '@/lib/db'
-
-/**
- * Represents a user of the application.
- */
-type User = {
-  id: number           // Unique identifier for the user (primary key)
-  email: string        // User's email address (must be unique)
-  password_hash: string // Hashed password for secure storage
-  created_at: Date     // Timestamp when the user account was created
-}
+import { User } from '@/types/user'
 
 /**
  * Inserts a new user into the database.
@@ -17,14 +8,35 @@ type User = {
  */
 export function insertUser(user: User) {
   const stmt = db.prepare(`
-    INSERT INTO users (id, email, password_hash, created_at)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO users (id, email, password_hash, first_name, last_name, image, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `)
 
   return stmt.run(
     user.id,
     user.email,
     user.password_hash,
-    user.created_at.toISOString() // Ensure consistent date format
+    user.first_name,
+    user.last_name,
+    user.image ?? null,
+    user.created_at,
   )
 }
+
+/**
+ * Gets a user from the database.
+ */
+export function getUserById(id: number): User | undefined {
+  const stmt = db.prepare(`
+    SELECT id, email, password_hash, first_name, last_name, image, created_at
+    FROM users
+    WHERE id = ?
+  `)
+
+  const row = stmt.get(id) as User | undefined;
+
+  if (!row) return undefined
+
+  return row;
+}
+
