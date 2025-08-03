@@ -2,19 +2,26 @@ import db from '@/lib/db'
 import { createSession, getUserIdFromSession, deleteSession } from '@/db/models/sessions'
 import deleteUserByUserId from '@/lib/test-helpers/delete-user-by-id'
 import { randomUUID } from 'crypto'
+import { insertUser } from '@/db/models/users'
 
 describe('session model', () => {
   const testUserId = 8888
+  const user = {
+    id: testUserId,
+    email: 'test-session@example.com',
+    password_hash: 'hashed_pw',
+    first_name: 'John',
+    last_name: 'Doe',
+    image: '',
+    created_at: new Date().toISOString(),
+  }
 
   beforeEach(() => {
     // Clean up any lingering data
     deleteUserByUserId(testUserId)
 
     // Insert a test user
-    db.prepare(`
-      INSERT INTO users (id, email, password_hash, created_at)
-      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-    `).run(testUserId, 'test-session@example.com', 'hashed_pw')
+    insertUser(user)
   })
 
   afterEach(() => {

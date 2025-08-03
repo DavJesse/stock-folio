@@ -51,7 +51,10 @@ describe('Portfolio Model', () => {
     id: 10,
     email: 'stock@example.com',
     password_hash: 'hash',
-    created_at: new Date(),
+    first_name: 'John',
+    last_name: 'Doe',
+    image: '',
+    created_at: new Date().toISOString(),
   }
 
   // Insert a user into the database before each test

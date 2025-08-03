@@ -2,6 +2,7 @@ import db from '@/lib/db'
 import { getAccountByUserId, updateCashBalance } from '@/db/models/accounts'
 import deleteUserByUserId from '@/lib/test-helpers/delete-user-by-id'
 import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
+import { insertUser } from '@/db/models/users'
 
 describe('account model', () => {
   const userId = 9999
@@ -11,11 +12,18 @@ describe('account model', () => {
     deleteUserByUserId(userId)
     deleteTestUserByEmail('test@example.com')
 
+    const user = {
+      id: userId,
+      email: 'test@example.com',
+      password_hash: 'hashed_pw',
+      first_name: 'John',
+      last_name: 'Doe',
+      image: '',
+      created_at: new Date().toISOString(),
+    }
+
     // Insert a test user
-    db.prepare(`
-      INSERT INTO users (id, email, password_hash, created_at)
-      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-    `).run(userId, 'test@example.com', 'hashed_pw')
+    insertUser(user)
 
     // Create an associated account for the user with an initial balance
     db.prepare(`
