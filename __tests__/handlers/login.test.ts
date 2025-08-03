@@ -1,12 +1,12 @@
 // External dependencies
 import bcrypt from 'bcrypt'
-import db from '@/lib/db'
 
 // Internal application modules
 import { handleLogin } from '@/lib/handlers/login'
 import { findUserByEmail } from '@/lib/queries/users/users'
 import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
 import deleteUserByUserId from '@/lib/test-helpers/delete-user-by-id'
+import { insertUser } from '@/db/models/users'
 import { User } from '@/types/user' // Import User type for strong typing
 
 // Mock the bcrypt and database methods for isolated unit testing
@@ -19,6 +19,8 @@ describe('handleLogin', () => {
     id: 123,
     email: 'user@example.com',
     password_hash: 'hashedPassword',
+    first_name: 'John',
+    last_name: 'Doe',
     created_at: new Date().toISOString(),
   }
 
@@ -31,10 +33,7 @@ describe('handleLogin', () => {
     deleteUserByUserId(mockUser.id)
 
     // Insert real user so foreign key doesn't fail
-    db.prepare(`
-      INSERT INTO users (id, email, password_hash, created_at)
-      VALUES (?, ?, ?, datetime('now'))
-    `).run(mockUser.id, mockUser.email, mockUser.password_hash)
+    insertUser(mockUser)
   })
 
   afterEach(() => {

@@ -23,6 +23,9 @@ describe('findUserByEmail', () => {
     id: 1,
     email: 'test@example.com',
     password_hash: 'hashed',
+    first_name: 'John',
+    last_name: 'Doe',
+    image: '',
     created_at: '2024-01-01T00:00:00.000Z',
   }
 
