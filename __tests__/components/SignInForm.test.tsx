@@ -6,6 +6,7 @@ import bcrypt from 'bcrypt' // Import bcrypt for password hashing
 
 // Internal component under test
 import SignInForm from '@/components/SignInForm'
+import { insertUser } from '@/db/models/users'
 
 // Helper to clear all cookies after each test
 function clearCookies() {
@@ -32,14 +33,26 @@ describe('LoginForm', () => {
   beforeEach(async () => {
     jest.resetAllMocks()
     clearCookies()
+
     // Generate a unique email for this test run
     TEST_EMAIL = `testuser_${Date.now()}@example.com`;
+
     // Hash the test password
     TEST_PASSWORD_HASH = await bcrypt.hash(TEST_PASSWORD, 10);
+
+    const user = {
+      id: 10,
+      email: TEST_EMAIL,
+      password_hash: TEST_PASSWORD_HASH,
+      first_name: 'John',
+      last_name: 'Doe',
+      image: '',
+      created_at: new Date().toISOString(),
+    }
+
     // Insert the test user into the database
-    db.prepare(
-      'INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, datetime(\'now\'))'
-    ).run(TEST_EMAIL, TEST_PASSWORD_HASH);
+    insertUser(user)
+
     // Robust fetch mock for all tests
     global.fetch = jest.fn((url: string) => {
       if (url === '/api/auth/csrf-token') {
@@ -49,6 +62,7 @@ describe('LoginForm', () => {
           json: async () => ({ csrfToken: 'test-csrf-token' }),
         })
       }
+
       if (url === '/api/auth/signin') {
         // Default: valid login
         return Promise.resolve({
@@ -57,11 +71,13 @@ describe('LoginForm', () => {
           json: async () => ({ token: 'fake-token', message: 'Login successful' }),
         })
       }
+
       return Promise.resolve({
         ok: false,
         status: 404,
         json: async () => ({}),
       })
+      
     }) as jest.Mock
   })
 
