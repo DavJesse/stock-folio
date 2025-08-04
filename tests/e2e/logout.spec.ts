@@ -1,20 +1,29 @@
 import { test, expect } from '@playwright/test'
 import bcrypt from 'bcrypt'
-import db from '@/lib/db'
 import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
+import { insertUser } from '@/db/models/users'
+import { User } from '@/types/user'
+
 
 test.describe('Login and Logout flow (DB seeded)', () => {
   const TEST_EMAIL = `user${Date.now()}@example.com`
   const TEST_PASSWORD = 'securePass123'
-
+  
   // Before the test, seed the user in the database
   test.beforeEach(() => {
     const passwordHash = bcrypt.hashSync(TEST_PASSWORD, 10)
 
-    db.prepare(`
-      INSERT INTO users (email, password_hash, created_at)
-      VALUES (?, ?, datetime('now', 'localtime'))
-    `).run(TEST_EMAIL, passwordHash)
+    const user: User = {
+    id: 123,
+    email: TEST_EMAIL,
+    password_hash: passwordHash,
+    first_name: 'John',
+    last_name: 'Doe',
+    image: '',
+    created_at:  new Date().toISOString(),
+    }
+
+    insertUser(user)
   })
 
   // After the test, clean up the user

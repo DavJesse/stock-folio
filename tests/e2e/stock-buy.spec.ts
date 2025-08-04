@@ -25,6 +25,8 @@ test.describe('E2E: Stock buy', () => {
     testEmail = `user${Date.now()}@example.com`
 
     // Fill out the signup form
+    await page.fill('#firstName', 'John')
+    await page.fill('#lastName', 'Doe')
     await page.fill('#email', testEmail)
     await page.fill('#password', 'secureP@ss123')
     await page.fill('#confirmPassword', 'secureP@ss123')

@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test'
 import bcrypt from 'bcrypt'
 import db from '@/lib/db'
+import { insertUser } from '@/db/models/users'
+import { User } from '@/types/user'
 
 const TEST_EMAIL = 'e2e_user@example.com'
 const TEST_PASSWORD = 'password123'
@@ -10,11 +12,18 @@ test.describe('Sign in flow with seeded user', () => {
     // Hash the password to match production format
     const passwordHash = await bcrypt.hash(TEST_PASSWORD, 10)
 
+    const user: User = {
+      id: 123,
+      email: TEST_EMAIL,
+      password_hash: passwordHash,
+      first_name: 'John',
+      last_name: 'Doe',
+      image: '',
+      created_at:  new Date().toISOString(),
+    }
+
     // Seed the test user into the database with current local time
-    db.prepare(`
-      INSERT INTO users (email, password_hash, created_at)
-      VALUES (?, ?, datetime('now', 'localtime'))
-    `).run(TEST_EMAIL, passwordHash)
+    insertUser(user)
   })
 
   test.afterEach(() => {
@@ -34,8 +43,8 @@ test.describe('Sign in flow with seeded user', () => {
     await page.getByLabel('Email').waitFor()
 
     // Fill out login credentials
-    await page.getByLabel('Email').fill(TEST_EMAIL)
-    await page.getByLabel('Password').fill(TEST_PASSWORD)
+    await page.getByLabel('Email:').fill(TEST_EMAIL)
+    await page.getByLabel('Password:').fill(TEST_PASSWORD)
 
     // Submit the login form
     const loginButton = page.getByLabel('submit-signin')

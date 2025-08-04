@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test'
 import bcrypt from 'bcrypt'
 import db from '@/lib/db'
+import { User } from '@/types/user'
+import { insertUser } from '@/db/models/users'
 
 const TEST_EMAIL = 'testuser@example.com'
 const TEST_PASSWORD = 'TestPass123'
@@ -10,10 +12,17 @@ test.describe('E2E: Stock search', () => {
   test.beforeEach(() => {
     const passwordHash = bcrypt.hashSync(TEST_PASSWORD, 10)
 
-    db.prepare(`
-      INSERT INTO users (email, password_hash, created_at)
-      VALUES (?, ?, datetime('now', 'localtime'))
-    `).run(TEST_EMAIL, passwordHash)
+    const user: User = {
+      id: 123,
+      email: TEST_EMAIL,
+      password_hash: passwordHash,
+      first_name: 'John',
+      last_name: 'Doe',
+      image: '',
+      created_at:  new Date().toISOString(),
+    }
+
+    insertUser(user)
   })
 
   // After the test, clean up the user
