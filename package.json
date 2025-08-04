@@ -15,6 +15,7 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.2.0",
+    "busboy": "^1.6.0",
     "canvas-confetti": "^1.9.3",
     "date-fns": "^4.1.0",
     "js-cookie": "^3.0.5",
@@ -38,6 +39,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/bcrypt": "^5.0.2",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/busboy": "^1.5.4",
     "@types/canvas-confetti": "^1.9.0",
     "@types/jest": "^30.0.0",
     "@types/js-cookie": "^3.0.6",
