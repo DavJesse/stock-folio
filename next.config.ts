@@ -17,11 +17,11 @@ const nextConfig = {
             value: isDev || isTest
               ? (
                   // Relaxed CSP for development/testing to allow inline and eval scripts
-                  "default-src 'self'; connect-src 'self' wss://ws.finnhub.io https://finnhub.io; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';"
+                  "default-src 'self'; connect-src 'self' wss://ws.finnhub.io https://finnhub.io; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; worker-src 'self' blob:;"
                 )
               : (
                   // Strict CSP for production to improve security
-                  "default-src 'self'; connect-src 'self' wss://ws.finnhub.io https://finnhub.io; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;"
+                  "default-src 'self'; connect-src 'self' wss://ws.finnhub.io https://finnhub.io; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;"
                 ),
           },
           {
