@@ -21,7 +21,7 @@ export default function HomePage() {
 
   // Render auth form if no token
   return (
-    <div className="min-h-screen flex items-center justify-center p-8">
+    <div className="fixed inset-0 flex items-center justify-center p-4">
       <AuthFormToggle />
     </div>
   )
