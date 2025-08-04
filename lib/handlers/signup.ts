@@ -7,22 +7,30 @@ import isStrongPassword from '../passwords/is-strong-password'
 type SignupPayload = {
   email: string
   password: string
+  first_name: string
+  last_name: string
+  image: string
 }
 
 export async function handleSignup(
   payload: SignupPayload
 ): Promise<{ status: number; body: object }> {
-  const { email, password } = payload
+  const { email, password, first_name, last_name, image } = payload
+  const sanitizedImage = image ?? ''
 
   if (
     typeof email !== 'string' ||
     typeof password !== 'string' ||
+    typeof first_name !== 'string' ||
+    typeof last_name !== 'string' ||
     email.trim() === '' ||
-    password.trim() === ''
+    password.trim() === '' ||
+    first_name.trim() === '' ||
+    last_name.trim() === ''
   ) {
     return {
       status: 400,
-      body: { error: 'Email and password are required.' },
+      body: { error: 'All fields, except profile image, are required.' },
     }
   }
 
@@ -51,8 +59,8 @@ export async function handleSignup(
 
   try {
     const insertUserStmt = db.prepare(`
-      INSERT INTO users (email, password_hash, created_at)
-      VALUES (?, ?, datetime('now', 'localtime'))
+      INSERT INTO users (email, password_hash, first_name, last_name, image, created_at)
+      VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'))
     `)
 
     const insertAccountStmt = db.prepare(`
@@ -66,7 +74,7 @@ export async function handleSignup(
     `)
 
     const transaction = db.transaction(() => {
-      const userResult = insertUserStmt.run(email, passwordHash)
+      const userResult = insertUserStmt.run(email, passwordHash, first_name, last_name, sanitizedImage)
       userId = userResult.lastInsertRowid as number
       
       insertAccountStmt.run(userId, 10_000)
@@ -99,7 +107,10 @@ export async function handleSignup(
       },
     }
   } catch (err) {
-    console.error('Signup transaction failed:', err)
+    if (process.env.LOG_ERRORS === 'true') {
+      console.error('Signup transaction failed:', err)
+    }
+    
     return {
       status: 500,
       body: { error: 'Failed to create account' },
