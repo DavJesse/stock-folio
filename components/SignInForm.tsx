@@ -24,6 +24,9 @@ export default function SignInForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
+  // Password visibility state
+  const [showPassword, setShowPassword] = useState(false)
+
   // UI feedback states
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -106,7 +109,7 @@ export default function SignInForm() {
 
   return (
     <form onSubmit={handleSubmit} aria-label="login-form">
-      <div className="flex flex-col gap-3 p-6">
+      <div className="flex flex-col gap-3">
         {error && (
           <p role="alert" className="text-[var(--warning-color)]">
             {error}
@@ -128,7 +131,7 @@ export default function SignInForm() {
           <input
             id="email"
             type="email"
-            className="bg-[var(--primary-background)] text-white py-1 px-2"
+            className="bg-[var(--primary-background)] text-white py-1 px-2 w-full border-2 border-gray-600/50 rounded transition-all duration-300 ease-in-out focus:outline-none focus:border-blue-400 focus:shadow-xl focus:shadow-blue-400/20 hover:border-gray-500/70"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -141,14 +144,51 @@ export default function SignInForm() {
             Password:
           </label>
           <br />
-          <input
-            id="password"
-            type="password"
-            className="bg-[var(--primary-background)] text-white py-1 px-2"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              className="bg-[var(--primary-background)] text-white py-1 px-2 pr-10 w-full border-2 border-gray-600/50 rounded transition-all duration-300 ease-in-out focus:outline-none focus:border-blue-400 focus:shadow-xl focus:shadow-blue-400/20 hover:border-gray-500/70"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-1 rounded transition-all duration-300 ease-in-out ${
+                showPassword 
+                  ? 'text-blue-400 shadow-lg shadow-blue-400/20' 
+                  : 'text-gray-400 hover:text-gray-300'
+              }`}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              <svg 
+                className="w-4 h-4" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                {showPassword ? (
+                  // Eye slash icon (hide)
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21m-7.757-7.757L21 21m-7.757-7.757a3 3 0 00-4.243-4.243m4.243 4.243L9.878 9.878" 
+                  />
+                ) : (
+                  // Eye icon (show)
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" 
+                  />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Submit button */}
