@@ -88,32 +88,32 @@ describe('LoginForm', () => {
 
   it('renders the login form fields and button', () => {
     render(<SignInForm />)
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
+    expect(screen.getByLabelText('Email:')).toBeInTheDocument()
+    expect(screen.getByLabelText('Password:')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /submit-signin/i })).toBeInTheDocument()
   })
 
   it('disables submit button when form is invalid', () => {
     render(<SignInForm />)
-    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: '' } })
-    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: '' } })
+    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: '' } })
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: '' } })
     expect(screen.getByRole('button', { name: /submit-signin/i })).toBeDisabled()
   })
 
   it('shows email format error if email is invalid', async () => {
     render(<SignInForm />)
-    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'bademail' } })
-    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'password123' } })
+    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'bademail' } })
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'password123' } })
     fireEvent.submit(screen.getByRole('form', { name: /login-form/i }))
     expect(await screen.findByText(/valid email/i)).toBeInTheDocument()
   })
 
   it('shows error if only email is provided', async () => {
     render(<SignInForm />)
-    fireEvent.change(screen.getByLabelText(/email/i), {
+    fireEvent.change(screen.getByLabelText('Email:'), {
       target: { value: TEST_EMAIL },
     })
-    fireEvent.change(screen.getByLabelText(/password/i), {
+    fireEvent.change(screen.getByLabelText('Password:'), {
       target: { value: '' },
     })
     fireEvent.submit(screen.getByRole('form', { name: /login-form/i }))
@@ -122,10 +122,10 @@ describe('LoginForm', () => {
 
   it('shows error if only password is provided', async () => {
     render(<SignInForm />)
-    fireEvent.change(screen.getByLabelText(/email/i), {
+    fireEvent.change(screen.getByLabelText('Email:'), {
       target: { value: '' },
     })
-    fireEvent.change(screen.getByLabelText(/password/i), {
+    fireEvent.change(screen.getByLabelText('Password:'), {
       target: { value: TEST_PASSWORD },
     })
     fireEvent.submit(screen.getByRole('form', { name: /login-form/i }))
@@ -156,10 +156,10 @@ describe('LoginForm', () => {
       })
     });
     render(<SignInForm />)
-    fireEvent.change(screen.getByLabelText(/email/i), {
+    fireEvent.change(screen.getByLabelText('Email:'), {
       target: { value: TEST_EMAIL },
     })
-    fireEvent.change(screen.getByLabelText(/password/i), {
+    fireEvent.change(screen.getByLabelText('Password:'), {
       target: { value: 'wrongpass' },
     })
     fireEvent.click(screen.getByRole('button', { name: /submit-signin/i }))
@@ -192,8 +192,8 @@ describe('LoginForm', () => {
       })
     })
     render(<SignInForm />)
-    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: TEST_EMAIL } })
-    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: TEST_PASSWORD } })
+    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: TEST_EMAIL } })
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: TEST_PASSWORD } })
     fireEvent.click(screen.getByRole('button', { name: /submit-signin/i }))
     expect(await screen.findByText(/login successful/i)).toBeInTheDocument()
   })
@@ -221,8 +221,8 @@ describe('LoginForm', () => {
       })
     })
     render(<SignInForm />)
-    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: TEST_EMAIL } })
-    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: TEST_PASSWORD } })
+    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: TEST_EMAIL } })
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: TEST_PASSWORD } })
     fireEvent.click(screen.getByRole('button', { name: /submit-signin/i }))
     expect(await screen.findByText(/invalid server response/i)).toBeInTheDocument()
   })
@@ -248,8 +248,8 @@ describe('LoginForm', () => {
       });
     });
     render(<SignInForm />)
-    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: TEST_EMAIL } })
-    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: TEST_PASSWORD } })
+    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: TEST_EMAIL } })
+    fireEvent.change(screen.getByLabelText('Password:'), { target: { value: TEST_PASSWORD } })
     fireEvent.click(screen.getByRole('button', { name: /submit-signin/i }))
     expect(await screen.findByText(/failed to connect/i)).toBeInTheDocument()
     consoleSpy.mockRestore();
