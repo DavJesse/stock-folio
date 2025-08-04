@@ -43,17 +43,21 @@ jobs:
       - name: Lint code
         run: npm run lint
 
-      # Step 5: Run unit and snapshot tests via Jest
+      # Step 5: Set up SQLite database from migration SQLs
+      - name: Run DB migrations
+        run: npm run db:migrate
+
+      # Step 6: Run unit and snapshot tests via Jest
       - name: Run unit & snapshot tests
         run: npm test
 
-      # Step 6: Install Playwright browsers and system dependencies
+      # Step 7: Install Playwright browsers and system dependencies
       - name: Install Playwright dependencies and browsers
         run: |
           npx playwright install-deps
           npx playwright install
 
-      # Step 7: Run Playwright E2E tests
+      # Step 8: Run Playwright E2E tests
       - name: Run E2E tests
         run: npm run test:e2e
 
