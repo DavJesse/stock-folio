@@ -13,6 +13,9 @@
 # SQLite database file
 db/db.sqlite
 
+# User profile images
+public/profile-image-uploads
+
 # testing
 /coverage
 test-results
