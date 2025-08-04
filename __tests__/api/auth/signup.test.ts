@@ -33,6 +33,7 @@ import bcrypt from 'bcrypt'
 import { handleSignup } from '@/lib/handlers/signup'
 import { User } from '@/types/user'
 import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
+import { insertUser } from '@/db/models/users';
 
 describe('handleSignup', () => {
   beforeEach(() => {
@@ -61,24 +62,36 @@ describe('handleSignup', () => {
     const res = await handleSignup({
       email: '',
       password: '',
+      first_name: 'John',
+      last_name: 'Doe',
+      image: '',
     })
 
     expect(res.status).toBe(400)
     expect(res.body).toEqual({
-      error: 'Email and password are required.',
+      error: 'All fields, except profile image, are required.',
     })
   })
 
   it('should return 409 when user already exists', async () => {
+    const user: User = {
+      id: 99999,
+      email: 'test@example.com',
+      password_hash: 'somehash',
+      first_name: 'John',
+      last_name: 'Doe',
+      image: '',
+      created_at: new Date().toISOString()
+    }
     // Manually insert a user to simulate existing account
-    db.prepare(
-      `INSERT INTO users (email, password_hash, created_at)
-       VALUES (?, ?, datetime('now', 'localtime'))`
-    ).run('test@example.com', 'somehash')
+    insertUser(user)
 
     const res = await handleSignup({
       email: 'test@example.com',
       password: 'secureP@ss123',
+      first_name: 'John',
+      last_name: 'Doe',
+      image: '',
     })
 
     expect(res.status).toBe(409)
@@ -93,6 +106,9 @@ describe('handleSignup', () => {
     const res = await handleSignup({
       email: 'hashcheck@example.com',
       password: plainPassword,
+      first_name: 'John',
+      last_name: 'Doe',
+      image: '',
     })
 
     expect(res.status).toBe(201)
