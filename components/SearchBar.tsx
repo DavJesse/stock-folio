@@ -231,7 +231,7 @@ export default function StockSearchBar() {
                     >
                       <Link
                         href={`/dashboard/stocks/${stock.symbol}`}
-                        scroll={false}
+                        scroll={false ? false : undefined}
                         className={`block p-3 rounded-lg cursor-pointer transition-all duration-200 ease-in-out hover:bg-white/10 hover:transform hover:scale-[1.01] focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-400/50 group ${selectedIndex === index ? 'bg-white/15 ring-2 ring-blue-400/30' : ''}`}
                         onClick={() => {
                           setIsOpen(false)
