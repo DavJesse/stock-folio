@@ -16,7 +16,10 @@ export function useAccountBalance() {
         const data = await res.json()
         setBalance(data.cash_balance) // Set the retrieved cash balance
       } catch (err) {
-        console.error(err) // Log any fetch or parsing errors
+        if (process.env.LOG_ERRORS === 'true') {
+          console.error(err) // Log any fetch or parsing errors
+        }
+        
       } finally {
         setLoading(false) // Mark loading as complete
       }
