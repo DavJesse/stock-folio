@@ -37,7 +37,6 @@ import { insertUser } from '@/db/models/users';
 
 describe('handleSignup', () => {
   beforeEach(() => {
-    process.env.JWT_SECRET = 'test-secret'
     
     // Reapply fetch mock
     global.fetch = jest.fn(() =>
@@ -53,7 +52,6 @@ describe('handleSignup', () => {
 
   afterEach(() => {
     jest.clearAllMocks()
-    delete process.env.JWT_SECRET
     deleteTestUserByEmail('test@example.com')
     deleteTestUserByEmail('hashcheck@example.com')
   })

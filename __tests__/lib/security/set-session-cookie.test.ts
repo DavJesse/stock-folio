@@ -15,7 +15,6 @@ describe('setSessionCookie', () => {
 
   beforeEach(() => {
     // Set test JWT secret and replace cookies mock
-    process.env = { ...originalEnv, JWT_SECRET: 'test-secret' }
     mockCookies.mockReturnValue({ set: mockSet })
   })
 
