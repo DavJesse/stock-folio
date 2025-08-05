@@ -51,7 +51,10 @@ export async function GET(req: NextRequest) {
     
   } catch (error) {
     // Log and return internal error
+    if (process.env.LOG_ERRORS === 'true') {
     console.error('Error fetching stock data:', error)
+    }
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
