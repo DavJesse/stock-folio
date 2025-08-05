@@ -1,12 +1,14 @@
 // External dependencies
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import db from '@/lib/db' // Import the SQLite database connection
 import bcrypt from 'bcrypt' // Import bcrypt for password hashing
+import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
+import deleteUserByUserId from '@/lib/test-helpers/delete-user-by-id'
 
 // Internal component under test
 import SignInForm from '@/components/SignInForm'
 import { insertUser } from '@/db/models/users'
+import { User } from '@/types/user'
 
 // Helper to clear all cookies after each test
 function clearCookies() {
@@ -40,7 +42,7 @@ describe('LoginForm', () => {
     // Hash the test password
     TEST_PASSWORD_HASH = await bcrypt.hash(TEST_PASSWORD, 10);
 
-    const user = {
+    const user: User = {
       id: 10,
       email: TEST_EMAIL,
       password_hash: TEST_PASSWORD_HASH,
@@ -49,6 +51,10 @@ describe('LoginForm', () => {
       image: '',
       created_at: new Date().toISOString(),
     }
+
+    // Delete test user
+    deleteTestUserByEmail(TEST_EMAIL)
+    deleteUserByUserId(10)
 
     // Insert the test user into the database
     insertUser(user)
@@ -83,7 +89,8 @@ describe('LoginForm', () => {
 
   afterEach(() => {
     // Remove the test user from the database after each test
-    db.prepare('DELETE FROM users WHERE email = ?').run(TEST_EMAIL);
+    deleteTestUserByEmail(TEST_EMAIL)
+    deleteUserByUserId(10)
   })
 
   it('renders the login form fields and button', () => {

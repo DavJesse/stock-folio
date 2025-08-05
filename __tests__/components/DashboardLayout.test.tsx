@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import DashboardLayout from '@/components/DashboardLayout'
 import '@testing-library/jest-dom'
 import React from 'react'
@@ -34,12 +34,14 @@ describe('DashboardLayout', () => {
   /**
    * UI Test: Verifies that the logout button is rendered.
    */
-  it('renders logout button', () => {
+  it('renders logout button', async () => {
+  await act(async () => {
     render(
       <DashboardLayout>
         <div>Mock Content</div>
       </DashboardLayout>
     )
+  })
 
     const logoutButton = screen.getByRole('button', { name: /log out/i })
     expect(logoutButton).toBeInTheDocument()
@@ -49,11 +51,13 @@ describe('DashboardLayout', () => {
    * Behavior Test: Verifies logout behavior—API call and redirection.
    */
   it('calls logout API and redirects to home on logout', async () => {
-    render(
-      <DashboardLayout>
-        <div>Mock Content</div>
-      </DashboardLayout>
-    )
+    await act(async () => {
+      render(
+        <DashboardLayout>
+          <div>Mock Content</div>
+        </DashboardLayout>
+      )
+    })
 
     const logoutButton = screen.getByRole('button', { name: /log out/i })
     fireEvent.click(logoutButton)

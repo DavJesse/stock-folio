@@ -42,6 +42,7 @@ describe('SignUpForm', () => {
           json: async () => ({ csrfToken: 'test-csrf-token' }),
         })
       }
+
       // Default: valid signup
       if (url === '/api/auth/signup') {
         return Promise.resolve({
@@ -50,6 +51,7 @@ describe('SignUpForm', () => {
           json: async () => ({ message: 'User created' }),
         })
       }
+
       return Promise.resolve({
         ok: false,
         status: 404,
@@ -59,7 +61,11 @@ describe('SignUpForm', () => {
   })
 
   it('renders email and password fields', async () => {
-    render(<SignUpForm />)
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
+
     await waitFor(() => {
       expect(screen.getByLabelText('First Name:')).toBeInTheDocument()
       expect(screen.getByLabelText('Last Name:')).toBeInTheDocument()
@@ -72,13 +78,18 @@ describe('SignUpForm', () => {
   })
 
   it('shows email format error only when email is invalid', async () => {
-    render(<SignUpForm />)
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
+
     fireEvent.change(screen.getByLabelText('First Name:'), { target: { value: 'John' } })
     fireEvent.change(screen.getByLabelText('Last Name:'), { target: { value: 'Doe' } })
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'invalid-email' } })
     fireEvent.change(screen.getByLabelText('Password:'), { target: { value: '123456' } })
     fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: '123456' } })
     fireEvent.submit(screen.getByRole('form', { name: /signup-form/i }))
+    
     await waitFor(() => {
       expect(screen.getByText(/please enter a valid email address/i)).toBeInTheDocument()
       expect(
@@ -88,13 +99,18 @@ describe('SignUpForm', () => {
   })
 
   it('shows error if passwords do not match', async () => {
-    render(<SignUpForm />)
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
+
     fireEvent.change(screen.getByLabelText('First Name:'), { target: { value: 'John' } })
     fireEvent.change(screen.getByLabelText('Last Name:'), { target: { value: 'Doe' } })
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'user@example.com' } })
     fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'p@ssword123' } })
     fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'wrongp@ss' } })
     fireEvent.submit(screen.getByRole('form', { name: /signup-form/i }))
+
     await waitFor(() => {
       expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument()
     })
@@ -109,36 +125,49 @@ describe('SignUpForm', () => {
           json: async () => ({ csrfToken: 'test-csrf-token' }),
         })
       }
+
       if (url === '/api/auth/signup') {
         return Promise.resolve({
           ok: false,
           json: async () => { throw new Error('Invalid JSON') },
         })
       }
+
       return Promise.resolve({
         ok: false,
         status: 404,
         json: async () => ({}),
       })
     })
-    render(<SignUpForm />)
+
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
+
     // Wait for the CSRF token to be set
     await waitFor(() => {
       expect(document.cookie).toMatch(/csrfToken=test-csrf-token/)
     })
+
     fireEvent.change(screen.getByLabelText('First Name:'), { target: { value: 'John' } })
     fireEvent.change(screen.getByLabelText('Last Name:'), { target: { value: 'Doe' } })
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'fail@example.com' } })
     fireEvent.change(screen.getByLabelText('Password:'), { target: { value: 'P@ssword123' } })
     fireEvent.change(screen.getByLabelText('Confirm Password:'), { target: { value: 'P@ssword123' } })
     fireEvent.click(screen.getByRole('button', { name: /submit-signup/i }))
+    
     await waitFor(() => {
       expect(screen.getByText(/Invalid server response/i)).toBeInTheDocument()
     })
   })
 
   it('shows password length error when password is too short', async () => {
-    render(<SignUpForm />)
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
+
     fireEvent.change(screen.getByLabelText('First Name:'), { target: { value: 'John' } })
     fireEvent.change(screen.getByLabelText('Last Name:'), { target: { value: 'Doe' } })
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'valid@example.com' } })
@@ -154,7 +183,11 @@ describe('SignUpForm', () => {
   })
 
   it('disables submit button when inputs are invalid', async () => {
-    render(<SignUpForm />)
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
+
     fireEvent.change(screen.getByLabelText('First Name:'), { target: { value: '' } })
     fireEvent.change(screen.getByLabelText('Last Name:'), { target: { value: '' } })
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: '' } })
@@ -170,6 +203,7 @@ describe('SignUpForm', () => {
     await waitFor(() => {
       expect(document.cookie).toMatch(/csrfToken=test-csrf-token/)
     })
+
     fireEvent.change(screen.getByLabelText('First Name:'), { target: { value: 'John' } })
     fireEvent.change(screen.getByLabelText('Last Name:'), { target: { value: 'Doe' } })
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'test@example.com' } })
@@ -182,7 +216,11 @@ describe('SignUpForm', () => {
   })
 
   it('shows error if any input field is left empty', async () => {
-    render(<SignUpForm />)
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
+
     fireEvent.change(screen.getByLabelText('First Name:'), { target: { value: 'John' } })
     fireEvent.change(screen.getByLabelText('Last Name:'), { target: { value: 'Doe' } })
     // Leave email blank
@@ -198,7 +236,10 @@ describe('SignUpForm', () => {
   })
 
   it('clears form inputs after successful submission', async () => {
-    render(<SignUpForm />)
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
 
     await waitFor(() => {
       expect(document.cookie).toMatch(/csrfToken=test-csrf-token/)
@@ -231,7 +272,11 @@ describe('SignUpForm', () => {
   })
 
   it('toggles password visibility when icon is clicked', async () => {
-    render(<SignUpForm />)
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
+
     const passwordInput = screen.getByLabelText('Password:')
     const toggleBtn = screen.getByLabelText('Show password')
 
@@ -241,7 +286,11 @@ describe('SignUpForm', () => {
   })
 
   it('displays password strength indicator when password is typed', async () => {
-    render(<SignUpForm />)
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
+
     const passwordInput = screen.getByLabelText('Password:')
     fireEvent.change(passwordInput, { target: { value: '123456' } })
 
@@ -251,7 +300,10 @@ describe('SignUpForm', () => {
   })
 
   it('shows error for unsupported image format', async () => {
-    render(<SignUpForm />)
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
 
     const fileInput = screen.getByTestId('image-input')
     const file = new File(['dummy'], 'dummy.txt', { type: 'text/plain' })
@@ -263,7 +315,10 @@ describe('SignUpForm', () => {
   })
 
   it('shows and removes image preview correctly', async () => {
-    render(<SignUpForm />)
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
 
     const fileInput = screen.getByTestId('image-input')
     const imageFile = new File(['(⌐□_□)'], 'avatar.png', { type: 'image/png' })
@@ -306,7 +361,10 @@ describe('SignUpForm', () => {
       return Promise.resolve({ ok: false })
     })
   
-    render(<SignUpForm />)
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
   
     // Wait for the CSRF token to be fetched and set in state
     await waitFor(() => {
@@ -355,7 +413,12 @@ describe('SignUpForm', () => {
         json: async () => ({}),
       })
     })
-    render(<SignUpForm />)
+    
+    await act(async () => {
+      render(<SignUpForm />)
+      await new Promise(resolve => setTimeout(resolve, 0)) 
+    })
+
     // Wait for the CSRF token to be set
     await waitFor(() => {
       expect(document.cookie).toMatch(/csrfToken=test-csrf-token/)
