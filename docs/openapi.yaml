@@ -504,13 +504,15 @@ paths:
                     type: string                         # Error message (e.g., "Account not found")
                     example: Account not found
 
-  /api/stocks/{symbol}:
+  /stocks/{symbol}:
     get:
       summary: Get stock quote and profile
       description: |
         Returns current quote and basic profile info for a given stock symbol.
         Requires authentication via bearer token in the request cookie.
       tags: [Stocks]
+      security:
+        - cookieAuth: []  # Session-based auth using cookie
       parameters:
         - name: symbol
           in: path
@@ -602,7 +604,7 @@ paths:
                     type: string
                     example: Internal server error
 
-  /api/portfolio:
+  /portfolio:
     get:
       tags:
         - Portfolio
@@ -655,7 +657,7 @@ paths:
                     type: string
                     example: Internal Server Error
 
-  /api/stocks/quotes:
+  /stocks/quotes:
     get:
       summary: Fetch current stock prices and company names
       description: >
@@ -663,6 +665,8 @@ paths:
         as a comma-separated `symbols` query parameter. Requires a valid session cookie.
       tags:
         - Stocks
+      security:
+        - cookieAuth: []  # Session-based auth using cookie
       parameters:
         - name: symbols
           in: query
@@ -719,3 +723,112 @@ paths:
                   error:
                     type: string
                     example: Failed to fetch stock data
+
+  /user/me:
+    get:
+      summary: Get authenticated user information
+      description: Retrieves the currently authenticated user's profile information.
+      tags:
+        - User
+      security:
+        - cookieAuth: []  # Session-based auth using cookie
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string          # Unique identifier of the user
+                  first_name:
+                    type: string          # User's first name
+                  last_name:
+                    type: string          # User's last name
+                  email:
+                    type: string          # User's email address
+                  image:
+                    type: string          # URL to user's profile image
+        '401':
+          description: Unauthorized - User not authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string          # Error message describing the authentication issue
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string          # Error message stating user is not found
+
+    put:
+      summary: Update authenticated user profile
+      description: Updates the profile information of the currently authenticated user.
+      tags:
+        - User
+      security:
+        - cookieAuth: []  # Session-based auth using cookie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - first_name            # Must include user's first name
+                - last_name             # Must include user's last name
+                - email                 # Must include user's email
+              properties:
+                first_name:
+                  type: string          # User's updated first name
+                last_name:
+                  type: string          # User's updated last name
+                email:
+                  type: string          # User's updated email address
+                image:
+                  type: string          # Optional updated profile image URL
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string        # Success confirmation message
+        '400':
+          description: Missing required fields in the request body
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string        # Error message describing the missing fields
+        '401':
+          description: Unauthorized - User not authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string        # Error message describing the authentication issue
+        '500':
+          description: Internal Server Error - Update failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string        # Error message explaining why the update failed
