@@ -12,7 +12,7 @@ import {
   Home,
   BarChart,
   Wallet,
-  DollarSign,
+  User,
   LogOut,
   Menu,
   X,
@@ -20,7 +20,7 @@ import {
 
 // Props interface
 interface DashboardLayoutProps {
-  children: ReactNode
+  readonly children: ReactNode
 }
 
 // Component: DashboardLayout
@@ -88,8 +88,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="flex items-center gap-2 text-white px-2 py-1">
-                    <DollarSign size={18} /> Crypto
+                  <a href="/dashboard/account-management" className="flex items-center gap-2 text-white px-2 py-1">
+                    <User size={18} /> Account Management
                   </a>
                 </li>
               </ul>
