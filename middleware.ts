@@ -25,6 +25,11 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/', req.url))
   }
 
+  // If user is not logged in and tries to access '/dashboard/account-management', redirect to '/'
+  if (pathname === '/dashboard/account-management' && !token) {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
+
   // Otherwise allow the request to continue
   return NextResponse.next()
 }
