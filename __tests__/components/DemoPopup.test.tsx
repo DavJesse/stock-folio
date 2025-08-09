@@ -70,31 +70,31 @@ describe('DemoPopup', () => {
   it('triggers confetti animation when popup opens', async () => {
     render(<DemoPopup />);
 
-    // Wait for confetti function call
-    await waitFor(() => {
-      expect(confetti).toHaveBeenCalledTimes(1);
-    });
+    // Wait for popup to appear
+    await screen.findByRole('dialog');
+
+    // Check if confetti was called
+    expect(confetti).toHaveBeenCalledTimes(1);
   });
+
 
   it('closes the popup when clicking outside the popup (backdrop)', async () => {
     render(<DemoPopup />);
-
-    const backdrop = await screen.findByRole('dialog', { hidden: true });
+  
+    const backdrop = await screen.findByRole('dialog');
     fireEvent.click(backdrop);
-
-    // Confirm popup is no longer in DOM
+  
     await waitFor(() => {
       expect(screen.queryByText(/Congratulations!/)).not.toBeInTheDocument();
     });
   });
-
+  
   it('closes the popup when clicking the close button', async () => {
     render(<DemoPopup />);
-
+  
     const closeBtn = await screen.findByLabelText('Close popup');
     fireEvent.click(closeBtn);
-
-    // Confirm popup is removed
+  
     await waitFor(() => {
       expect(screen.queryByText(/Congratulations!/)).not.toBeInTheDocument();
     });
