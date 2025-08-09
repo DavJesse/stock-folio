@@ -23,7 +23,7 @@ test.describe('E2E: Stock search', () => {
 
     // Mock search API
     await page.route('**/api/stocks/**', async route => {
-      console.log('Intercepted search request:', route.request().url())
+      // console.log('Intercepted search request:', route.request().url())
       const mockResults = [
         { symbol: 'AAPL', description: 'APPLE INC COMMON STOCK', type: 'EQUITY' }
       ]
