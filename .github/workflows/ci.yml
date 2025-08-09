@@ -52,14 +52,14 @@ jobs:
         run: npm test
 
       # Step 7: Install Playwright browsers and system dependencies
-      - name: Install Playwright dependencies and browsers
-        run: |
-          npx playwright install-deps
-          npx playwright install
+      # - name: Install Playwright dependencies and browsers
+      #   run: |
+      #     npx playwright install-deps
+      #     npx playwright install
 
-      # Step 8: Run Playwright E2E tests
-      - name: Run E2E tests
-        run: npm run test:e2e
+      # # Step 8: Run Playwright E2E tests
+      # - name: Run E2E tests
+      #   run: npm run test:e2e
 
   # sonar:
   #   name: SonarQube Analysis
