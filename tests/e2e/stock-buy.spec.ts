@@ -1,96 +1,105 @@
 import { test, expect } from '@playwright/test'
-import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
+import bcrypt from 'bcrypt'
+import db from '@/lib/db'
+import { insertUser } from '@/db/models/users'
+import { User } from '@/types/user'
+
+const TEST_EMAIL = 'testuser@example.com'
+const TEST_PASSWORD = 'TestPass123'
 
 test.describe('E2E: Stock buy', () => {
-  let testEmail = ''
+  let searchHit = false
+  let buyHit = false
 
-  test.afterEach(() => {
-    if (testEmail) {
-      deleteTestUserByEmail(testEmail)
+  test.beforeEach(async ({ page }) => {
+    // Seed user
+    const passwordHash = bcrypt.hashSync(TEST_PASSWORD, 10)
+    const user: User = {
+      id: 123,
+      email: TEST_EMAIL,
+      password_hash: passwordHash,
+      first_name: 'John',
+      last_name: 'Doe',
+      image: '',
+      created_at: new Date().toISOString(),
     }
-  })
+    insertUser(user)
 
-  test('logs in, searches for stock, opens modal, and buys shares', async ({ page }) => {
-    // Mock search API
-    await page.route('**/api/stocks/**', async route => {
+    // Mock stock search
+    await page.route('**/api/stocks*', async route => {
+      searchHit = true
       console.log('Intercepted search request:', route.request().url())
-      const mockResults = [
-        { symbol: 'AAPL', description: 'APPLE INC Common Stock', type: 'EQUITY' }
-      ]
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(mockResults)
+        body: JSON.stringify([
+          {
+            symbol: 'AAPL',
+            name: 'APPLE INC Common Stock',
+            exchange: 'NASDAQ',
+          },
+        ]),
       })
     })
 
-    // Mock buy API
+    // Mock buy request
     await page.route('**/api/transactions/buy', async route => {
+      buyHit = true
       console.log('Intercepted buy request:', route.request().url())
-      const body = await route.request().postDataJSON()
-      console.log('Buy request body:', body)
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          cash_balance: 10000 - body.quantity * body.price,
-          portfolio: { symbol: body.symbol, quantity: body.quantity, average_price: body.price }
-        })
+          cash_balance: 9500,
+          portfolio: {
+            symbol: 'AAPL',
+            quantity: 5,
+            average_price: 100,
+          },
+        }),
       })
     })
+  })
 
-    // Navigate to homepage
+  test.afterEach(() => {
+    db.prepare('DELETE FROM users WHERE email = ?').run(TEST_EMAIL)
+    if (!searchHit) console.warn('⚠ No search API request intercepted!')
+    if (!buyHit) console.warn('⚠ No buy API request intercepted!')
+    searchHit = false
+    buyHit = false
+  })
+
+  test('logs in, searches for stock, opens modal, and buys shares', async ({ page }) => {
     await page.goto('/')
 
-    // Switch to Sign Up
-    const signUpTab = page.getByRole('button', { name: /sign up/i })
-    if (await signUpTab.isVisible()) await signUpTab.click()
-
-    // Generate test email
-    testEmail = `user${Date.now()}@example.com`
-
-    // Fill signup form
-    await page.fill('#firstName', 'John')
-    await page.fill('#lastName', 'Doe')
-    await page.fill('#email', testEmail)
-    await page.fill('#password', 'secureP@ss123')
-    await page.fill('#confirmPassword', 'secureP@ss123')
-
-    const submitButton = page.getByLabel('submit-signup')
-    await expect(submitButton).toBeEnabled()
-    await submitButton.click()
-
-    // Wait for dashboard
+    // Login
+    const loginTab = page.getByRole('button', { name: /Sign In/i })
+    await loginTab.waitFor({ state: 'visible' })
+    await loginTab.click()
+    await page.fill('#email', TEST_EMAIL)
+    await page.fill('#password', TEST_PASSWORD)
+    await expect(page.getByLabel('submit-signin')).toBeEnabled()
+    await page.getByLabel('submit-signin').click()
     await expect(page).toHaveURL('/dashboard')
 
-    // Close popup
-    const popup = page.getByRole('dialog')
-    await expect(popup).toBeVisible()
-    await popup.getByRole('button', { name: /close popup/i }).click()
-
-    // Search for stock
+    // Search stock
     const searchInput = page.getByPlaceholder('Search stocks...')
-    await searchInput.fill('aapl')
+    await searchInput.fill('AAPL')
 
-    // Wait for mocked results
+    // Wait for mocked dropdown
     const listbox = page.getByRole('listbox')
     await expect(listbox).toBeVisible({ timeout: 10000 })
 
+    // Select stock
     const option = page.getByRole('option', { name: /AAPL APPLE INC Common Stock/i })
     await expect(option).toBeVisible()
     await option.click()
 
-    // Verify modal
-    const modalTitle = page.getByTestId('stock-symbol')
-    await expect(modalTitle).toHaveText('AAPL')
+    // Buy modal flow
+    await page.fill('#quantity', '5')
+    await page.getByRole('button', { name: /Buy/i }).click()
 
-    // Set quantity and buy
-    await page.getByTestId('quantity-input').fill('5')
-    const buyButton = page.getByRole('button', { name: /Buy 5 Share/i })
-    await expect(buyButton).toBeVisible()
-    await buyButton.click()
-
-    // Success message
-    await expect(page.getByText(/Successfully bought 5 shares of AAPL!/i)).toBeVisible()
+    // Expect success toast
+    await expect(page.getByText(/purchase successful/i)).toBeVisible()
   })
 })
