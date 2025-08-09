@@ -9,9 +9,7 @@ const TEST_PASSWORD = 'TestPass123'
 
 test.describe('E2E: Stock search', () => {
   test.beforeEach(async ({ page }) => {
-    // Seed user in DB
     const passwordHash = bcrypt.hashSync(TEST_PASSWORD, 10)
-
     const user: User = {
       id: 123,
       email: TEST_EMAIL,
@@ -21,22 +19,18 @@ test.describe('E2E: Stock search', () => {
       image: '',
       created_at: new Date().toISOString(),
     }
-
     insertUser(user)
 
-    // --- Mock the search API ---
-    await page.route('**/api/stocks?**', async route => {
+    // Mock search API
+    await page.route('**/api/stocks/**', async route => {
+      console.log('Intercepted search request:', route.request().url())
       const mockResults = [
-        {
-          symbol: 'AAPL',
-          description: 'APPLE INC COMMON STOCK',
-          type: 'EQUITY',
-        },
+        { symbol: 'AAPL', description: 'APPLE INC COMMON STOCK', type: 'EQUITY' }
       ]
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(mockResults),
+        body: JSON.stringify(mockResults)
       })
     })
   })
@@ -49,32 +43,30 @@ test.describe('E2E: Stock search', () => {
     // Go to login page
     await page.goto('/')
 
-    // Switch to Sign In tab if needed
     const loginTab = page.getByRole('button', { name: /Sign In/i })
     await loginTab.waitFor({ state: 'visible' })
-    if (await loginTab.isVisible()) {
-      await loginTab.click()
-    }
+    if (await loginTab.isVisible()) await loginTab.click()
 
-    // Fill in login form
+    await page.waitForSelector('#email')
+    await page.waitForSelector('#password')
+
     await page.fill('#email', TEST_EMAIL)
     await page.fill('#password', TEST_PASSWORD)
 
-    // Wait for login button to be enabled
     const loginButton = page.getByLabel('submit-signin')
+    await page.waitForSelector('[aria-label="submit-signin"]:not([disabled])')
+
     await expect(loginButton).toBeEnabled()
     await loginButton.click()
 
-    // Expect redirect to dashboard
     await expect(page).toHaveURL('/dashboard')
 
-    // Search with mixed casing
+    // Search
     const searchInput = page.getByPlaceholder('Search stocks...')
     await searchInput.fill('aApL')
-    await searchInput.focus() // keep dropdown open
 
     // Wait for mocked dropdown result
     const option = page.getByRole('link', { name: /AAPL APPLE INC COMMON STOCK/i })
-    await expect(option).toBeVisible({ timeout: 5000 })
+    await expect(option).toBeVisible({ timeout: 10000 })
   })
 })

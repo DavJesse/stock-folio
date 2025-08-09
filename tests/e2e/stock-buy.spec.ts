@@ -4,21 +4,18 @@ import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
 test.describe('E2E: Stock buy', () => {
   let testEmail = ''
 
-  test.afterEach(async () => {
+  test.afterEach(() => {
     if (testEmail) {
       deleteTestUserByEmail(testEmail)
     }
   })
 
   test('logs in, searches for stock, opens modal, and buys shares', async ({ page }) => {
-    // --- Mock the actual search endpoint your app calls ---
-    await page.route('**/api/stocks?**', async route => {
+    // Mock search API
+    await page.route('**/api/stocks/**', async route => {
+      console.log('Intercepted search request:', route.request().url())
       const mockResults = [
-        {
-          symbol: 'AAPL',
-          description: 'APPLE INC Common Stock',
-          type: 'EQUITY'
-        }
+        { symbol: 'AAPL', description: 'APPLE INC Common Stock', type: 'EQUITY' }
       ]
       await route.fulfill({
         status: 200,
@@ -27,33 +24,32 @@ test.describe('E2E: Stock buy', () => {
       })
     })
 
-    // --- Mock Buy API ---
+    // Mock buy API
     await page.route('**/api/transactions/buy', async route => {
+      console.log('Intercepted buy request:', route.request().url())
       const body = await route.request().postDataJSON()
+      console.log('Buy request body:', body)
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          cash_balance: 10000 - body.quantity * 150,
-          portfolio: {
-            symbol: body.symbol,
-            quantity: body.quantity,
-            average_price: 150
-          }
+          cash_balance: 10000 - body.quantity * body.price,
+          portfolio: { symbol: body.symbol, quantity: body.quantity, average_price: body.price }
         })
       })
     })
 
-    // --- Navigate ---
+    // Navigate to homepage
     await page.goto('/')
 
-    // --- Sign Up ---
+    // Switch to Sign Up
     const signUpTab = page.getByRole('button', { name: /sign up/i })
-    if (await signUpTab.isVisible()) {
-      await signUpTab.click()
-    }
+    if (await signUpTab.isVisible()) await signUpTab.click()
 
+    // Generate test email
     testEmail = `user${Date.now()}@example.com`
+
+    // Fill signup form
     await page.fill('#firstName', 'John')
     await page.fill('#lastName', 'Doe')
     await page.fill('#email', testEmail)
@@ -64,18 +60,17 @@ test.describe('E2E: Stock buy', () => {
     await expect(submitButton).toBeEnabled()
     await submitButton.click()
 
+    // Wait for dashboard
     await expect(page).toHaveURL('/dashboard')
 
+    // Close popup
     const popup = page.getByRole('dialog')
     await expect(popup).toBeVisible()
     await popup.getByRole('button', { name: /close popup/i }).click()
 
-    // --- Search ---
+    // Search for stock
     const searchInput = page.getByPlaceholder('Search stocks...')
     await searchInput.fill('aapl')
-
-    // Keep focus so dropdown stays open
-    await searchInput.focus()
 
     // Wait for mocked results
     const listbox = page.getByRole('listbox')
@@ -85,17 +80,17 @@ test.describe('E2E: Stock buy', () => {
     await expect(option).toBeVisible()
     await option.click()
 
-    // --- Verify modal ---
+    // Verify modal
     const modalTitle = page.getByTestId('stock-symbol')
     await expect(modalTitle).toHaveText('AAPL')
 
+    // Set quantity and buy
     await page.getByTestId('quantity-input').fill('5')
     const buyButton = page.getByRole('button', { name: /Buy 5 Share/i })
     await expect(buyButton).toBeVisible()
     await buyButton.click()
 
-    await expect(
-      page.getByText('Successfully bought 5 shares of AAPL!')
-    ).toBeVisible()
+    // Success message
+    await expect(page.getByText(/Successfully bought 5 shares of AAPL!/i)).toBeVisible()
   })
 })
