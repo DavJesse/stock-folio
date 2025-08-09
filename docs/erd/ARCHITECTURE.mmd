@@ -1,0 +1,74 @@
+flowchart TB
+    %% ==== CLIENT LAYER ====
+    subgraph Client[Client Layer]
+        Browser[Browser / Next.js Frontend]
+    end
+
+    %% ==== API LAYER ====
+    subgraph API[Backend API Layer - Next.js API Routes]
+        AuthSignup["POST /auth/signup"]
+        AuthSignin["POST /auth/signin"]
+        AuthLogout["POST /auth/logout"]
+        CsrfToken["GET /auth/csrf-token"]
+        SearchStock["GET /search"]
+        StockQuote["GET /stocks/{symbol}"]
+        BuyStock["POST /transactions/buy"]
+        SellStock["POST /transactions/sell"]
+        GetBalance["GET /account/balance"]
+        GetPortfolio["GET /portfolio"]
+        GetUser["GET /user/me"]
+        UpdateUser["PUT /user/me"]
+    end
+
+    %% ==== DATABASE LAYER ====
+    subgraph DB[Database Layer - SQLite]
+        Users[(users)]
+        Accounts[(accounts)]
+        Portfolio[(portfolio)]
+        Transactions[(transactions)]
+        Sessions[(sessions)]
+    end
+
+    %% ==== FLOWS ====
+    Browser -->|HTTP Requests| API
+    %% Auth
+    AuthSignup --> Users
+    AuthSignin --> Users
+    AuthLogout --> Sessions
+    CsrfToken --> Sessions
+
+    %% Stock Search
+    SearchStock -->|Fetch data| ExternalAPI[(Finnhub API)]
+
+    %% Stock Quotes
+    StockQuote --> Portfolio
+
+    %% Transactions
+    BuyStock --> Accounts
+    BuyStock --> Portfolio
+    BuyStock --> Transactions
+
+    SellStock --> Accounts
+    SellStock --> Portfolio
+    SellStock --> Transactions
+
+    %% Accounts
+    GetBalance --> Accounts
+
+    %% Portfolio
+    GetPortfolio --> Portfolio
+
+    %% User Profile
+    GetUser --> Users
+    UpdateUser --> Users
+
+    %% Auth Session Storage
+    AuthSignin --> Sessions
+    AuthLogout --> Sessions
+    Sessions --> Users
+
+    %% Relationships between tables
+    Users --> Accounts
+    Users --> Portfolio
+    Users --> Transactions
+    Users --> Sessions
