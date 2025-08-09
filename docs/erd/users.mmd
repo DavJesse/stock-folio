@@ -2,10 +2,16 @@ erDiagram
     users {
         %% Primary key uniquely identifies each user
         INTEGER id PK
-        %% Stores user's email address for authentication and contact
+        %% Stores user's email address for authentication and contact (must be unique)
         TEXT email
         %% Securely stores hashed password, never plain text
         TEXT password_hash
+        %% User's first name (required)
+        TEXT first_name
+        %% User's last name (required)
+        TEXT last_name
+        %% Optional link or path to the user's profile image
+        TEXT image
         %% Timestamp for when the user account was created
         DATETIME created_at
     }

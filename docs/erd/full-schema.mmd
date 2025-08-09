@@ -12,8 +12,11 @@ erDiagram
 
     users {
         INTEGER id PK
-        TEXT email "UNIQUE"
+        TEXT email
         TEXT password_hash
+        TEXT first_name
+        TEXT last_name
+        TEXT image
         DATETIME created_at
     }
 
