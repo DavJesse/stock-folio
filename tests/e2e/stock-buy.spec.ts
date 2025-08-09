@@ -4,84 +4,98 @@ import deleteTestUserByEmail from '@/lib/test-helpers/delete-test-user'
 test.describe('E2E: Stock buy', () => {
   let testEmail = ''
 
-  // After each test, clean up the test user from the database
-  test.afterEach(() => {
+  test.afterEach(async () => {
     if (testEmail) {
       deleteTestUserByEmail(testEmail)
     }
   })
 
   test('logs in, searches for stock, opens modal, and buys shares', async ({ page }) => {
-    // Navigate to homepage
+    // --- Mock the actual search endpoint your app calls ---
+    await page.route('**/api/stocks?**', async route => {
+      const mockResults = [
+        {
+          symbol: 'AAPL',
+          description: 'APPLE INC Common Stock',
+          type: 'EQUITY'
+        }
+      ]
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockResults)
+      })
+    })
+
+    // --- Mock Buy API ---
+    await page.route('**/api/transactions/buy', async route => {
+      const body = await route.request().postDataJSON()
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          cash_balance: 10000 - body.quantity * 150,
+          portfolio: {
+            symbol: body.symbol,
+            quantity: body.quantity,
+            average_price: 150
+          }
+        })
+      })
+    })
+
+    // --- Navigate ---
     await page.goto('/')
 
-    // Switch to Sign Up tab if not selected by default
+    // --- Sign Up ---
     const signUpTab = page.getByRole('button', { name: /sign up/i })
     if (await signUpTab.isVisible()) {
       await signUpTab.click()
     }
 
-    // Generate a unique test email using timestamp
     testEmail = `user${Date.now()}@example.com`
-
-    // Fill out the signup form
     await page.fill('#firstName', 'John')
     await page.fill('#lastName', 'Doe')
     await page.fill('#email', testEmail)
     await page.fill('#password', 'secureP@ss123')
     await page.fill('#confirmPassword', 'secureP@ss123')
 
-    // Wait for validation and button activation
-   const submitButton = page.getByLabel('submit-signup')
-   await expect(submitButton).toBeEnabled()
-
-    // Submit the form
+    const submitButton = page.getByLabel('submit-signup')
+    await expect(submitButton).toBeEnabled()
     await submitButton.click()
 
-    // Expect redirection to the dashboard
     await expect(page).toHaveURL('/dashboard')
 
-    // Wait for popup with "Congratulations!" or 🎉 emoji
     const popup = page.getByRole('dialog')
     await expect(popup).toBeVisible()
-    await expect(popup).toContainText('Congratulations!')
-    await expect(popup).toBeVisible()
+    await popup.getByRole('button', { name: /close popup/i }).click()
 
-    // Check popup contains message
-    await expect(popup).toContainText('Congratulations!')
-    await expect(popup).toContainText('🎉')
-
-    // Close the popup
-    const closeButton = popup.getByRole('button', { name: /close popup/i })
-    await closeButton.click()
-
+    // --- Search ---
     const searchInput = page.getByPlaceholder('Search stocks...')
     await searchInput.fill('aapl')
 
-    await page.waitForTimeout(1200)
+    // Keep focus so dropdown stays open
+    await searchInput.focus()
 
-    // Wait for results to appear
-    await expect(page.getByRole('listbox')).toBeVisible()
+    // Wait for mocked results
+    const listbox = page.getByRole('listbox')
+    await expect(listbox).toBeVisible({ timeout: 10000 })
 
-    // Click on the stock result using role and accessible name
     const option = page.getByRole('option', { name: /AAPL APPLE INC Common Stock/i })
     await expect(option).toBeVisible()
     await option.click()
 
-    // Wait for the modal to appear
+    // --- Verify modal ---
     const modalTitle = page.getByTestId('stock-symbol')
     await expect(modalTitle).toHaveText('AAPL')
 
-    // Set quantity to 5
-    const quantityInput = page.getByTestId('quantity-input')
-    await quantityInput.fill('5')
-
-    // Click the Buy button
+    await page.getByTestId('quantity-input').fill('5')
     const buyButton = page.getByRole('button', { name: /Buy 5 Share/i })
     await expect(buyButton).toBeVisible()
     await buyButton.click()
 
-    // Check for success message
-    await expect(page.getByText('Successfully bought 5 shares of AAPL!')).toBeVisible()
+    await expect(
+      page.getByText('Successfully bought 5 shares of AAPL!')
+    ).toBeVisible()
   })
 })

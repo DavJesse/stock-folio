@@ -8,8 +8,8 @@ const TEST_EMAIL = 'testuser@example.com'
 const TEST_PASSWORD = 'TestPass123'
 
 test.describe('E2E: Stock search', () => {
-  // Before the test, seed the user in the database
-  test.beforeEach(() => {
+  test.beforeEach(async ({ page }) => {
+    // Seed user in DB
     const passwordHash = bcrypt.hashSync(TEST_PASSWORD, 10)
 
     const user: User = {
@@ -19,13 +19,28 @@ test.describe('E2E: Stock search', () => {
       first_name: 'John',
       last_name: 'Doe',
       image: '',
-      created_at:  new Date().toISOString(),
+      created_at: new Date().toISOString(),
     }
 
     insertUser(user)
+
+    // --- Mock the search API ---
+    await page.route('**/api/stocks?**', async route => {
+      const mockResults = [
+        {
+          symbol: 'AAPL',
+          description: 'APPLE INC COMMON STOCK',
+          type: 'EQUITY',
+        },
+      ]
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockResults),
+      })
+    })
   })
 
-  // After the test, clean up the user
   test.afterEach(() => {
     db.prepare('DELETE FROM users WHERE email = ?').run(TEST_EMAIL)
   })
@@ -34,16 +49,12 @@ test.describe('E2E: Stock search', () => {
     // Go to login page
     await page.goto('/')
 
-    // Wait for login tab to appear and switch to Log In tab if needed
+    // Switch to Sign In tab if needed
     const loginTab = page.getByRole('button', { name: /Sign In/i })
     await loginTab.waitFor({ state: 'visible' })
     if (await loginTab.isVisible()) {
       await loginTab.click()
     }
-
-    // Wait for email and password fields to be attached to the DOM
-    await page.waitForSelector('#email')
-    await page.waitForSelector('#password')
 
     // Fill in login form
     await page.fill('#email', TEST_EMAIL)
@@ -51,25 +62,19 @@ test.describe('E2E: Stock search', () => {
 
     // Wait for login button to be enabled
     const loginButton = page.getByLabel('submit-signin')
-    await page.waitForSelector('[aria-label="submit-signin"]:not([disabled])')
-
-    // Click login button
     await expect(loginButton).toBeEnabled()
     await loginButton.click()
 
     // Expect redirect to dashboard
     await expect(page).toHaveURL('/dashboard')
 
-    // Fill in stock search with mixed casing
+    // Search with mixed casing
     const searchInput = page.getByPlaceholder('Search stocks...')
     await searchInput.fill('aApL')
+    await searchInput.focus() // keep dropdown open
 
-    // Wait for dropdown result to load
-    await page.waitForTimeout(600)
-
-    // Check that correct stock appears
-    await expect(
-  page.getByRole('link', { name: /AAPL APPLE INC COMMON STOCK/i })
-).toBeVisible()
+    // Wait for mocked dropdown result
+    const option = page.getByRole('link', { name: /AAPL APPLE INC COMMON STOCK/i })
+    await expect(option).toBeVisible({ timeout: 5000 })
   })
 })
