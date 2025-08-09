@@ -16,15 +16,13 @@ jest.mock('canvas-confetti', () => jest.fn());
 
 describe('DemoPopup', () => {
   const originalLocalStorage = window.localStorage;
-
+  
   beforeEach(() => {
-    // Mock localStorage with predefined key-value pair
-    const store: Record<string, string> = {
-      demoMessage: 'You have successfully signed up!',
-    };
-
+    // Persistent in-memory store for mocking
+    let store: Record<string, string> = {};
+  
     const mockLocalStorage = {
-      getItem: (key: string) => store[key] || null,
+      getItem: (key: string) => (key in store ? store[key] : null),
       setItem: (key: string, value: string) => {
         store[key] = value;
       },
@@ -32,20 +30,25 @@ describe('DemoPopup', () => {
         delete store[key];
       },
       clear: () => {
-        Object.keys(store).forEach((key) => delete store[key]);
+        store = {};
       },
     };
-
+  
+    // Always start each test with demoMessage set
+    store['demoMessage'] = 'You have successfully signed up!';
+  
     // Override browser's localStorage
     Object.defineProperty(window, 'localStorage', {
       value: mockLocalStorage,
+      writable: true,
     });
   });
-
+  
   afterEach(() => {
     // Restore original localStorage and clear mocks
     Object.defineProperty(window, 'localStorage', {
       value: originalLocalStorage,
+      writable: true,
     });
     jest.clearAllMocks();
   });
@@ -80,21 +83,21 @@ describe('DemoPopup', () => {
 
   it('closes the popup when clicking outside the popup (backdrop)', async () => {
     render(<DemoPopup />);
-  
+
     const backdrop = await screen.findByRole('dialog');
     fireEvent.click(backdrop);
-  
+
     await waitFor(() => {
       expect(screen.queryByText(/Congratulations!/)).not.toBeInTheDocument();
     });
   });
-  
+
   it('closes the popup when clicking the close button', async () => {
     render(<DemoPopup />);
-  
+
     const closeBtn = await screen.findByLabelText('Close popup');
     fireEvent.click(closeBtn);
-  
+
     await waitFor(() => {
       expect(screen.queryByText(/Congratulations!/)).not.toBeInTheDocument();
     });
