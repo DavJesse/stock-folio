@@ -2,10 +2,11 @@
 
 import { EnrichedPortfolioEntry, PortfolioSummary } from '@/types/portfolio'
 import getGainLossColor from '@/lib/portfolio/gain-loss-color'
+import formatCurrency from '@/lib/format/format-currency'
 
 type Props = {
-  data: EnrichedPortfolioEntry[]
-  summary: PortfolioSummary
+  readonly data: EnrichedPortfolioEntry[]
+  readonly summary: PortfolioSummary
 }
 
 export default function PortfolioTable({ data, summary }: Props) {
@@ -37,15 +38,15 @@ export default function PortfolioTable({ data, summary }: Props) {
                   <td className="px-4 py-2 border border-gray-700">{entry.symbol}</td>
                   <td className="px-4 py-2 border border-gray-700">{entry.company}</td>
                   <td className="px-4 py-2 border border-gray-700">{entry.quantity}</td>
-                  <td className="px-4 py-2 border border-gray-700">${entry.initialPrice.toFixed(2)}</td>
-                  <td className="px-4 py-2 border border-gray-700">${entry.currentPrice.toFixed(2)}</td>
-                  <td className="px-4 py-2 border border-gray-700">${entry.totalCost.toFixed(2)}</td>
-                  <td className="px-4 py-2 border border-gray-700">${entry.currentValue.toFixed(2)}</td>
+                  <td className="px-4 py-2 border border-gray-700">{formatCurrency(entry.initialPrice)}</td>
+                  <td className="px-4 py-2 border border-gray-700">{formatCurrency(entry.currentPrice)}</td>
+                  <td className="px-4 py-2 border border-gray-700">{formatCurrency(entry.totalCost)}</td>
+                  <td className="px-4 py-2 border border-gray-700">{formatCurrency(entry.currentValue)}</td>
                   <td
                     className="px-4 py-2 border border-gray-700 font-semibold"
                     style={{ color: getGainLossColor(entry.gainLoss) }}
                   >
-                    ${entry.gainLoss.toFixed(2)} ({entry.gainLossPercent.toFixed(2)}%)
+                    {formatCurrency(entry.gainLoss)} ({entry.gainLossPercent.toFixed(2)}%)
                   </td>
                 </tr>
               ))}
@@ -53,13 +54,13 @@ export default function PortfolioTable({ data, summary }: Props) {
               {/* Totals row */}
               <tr className="bg-gray-900 font-bold border-t border-gray-700">
                 <td colSpan={5} className="px-4 py-2 border border-gray-700 text-right">Total</td>
-                <td className="px-4 py-2 border border-gray-700">${summary.totalCost.toFixed(2)}</td>
-                <td className="px-4 py-2 border border-gray-700">${summary.totalValue.toFixed(2)}</td>
+                <td className="px-4 py-2 border border-gray-700">{formatCurrency(summary.totalCost)}</td>
+                <td className="px-4 py-2 border border-gray-700">{formatCurrency(summary.totalValue)}</td>
                 <td
                   className="px-4 py-2 border border-gray-700"
                   style={{ color: getGainLossColor(summary.totalGainLoss) }}
                 >
-                  ${summary.totalGainLoss.toFixed(2)} ({gainLossPercent.toFixed(2)}%)
+                  {formatCurrency(summary.totalGainLoss)} ({gainLossPercent.toFixed(2)}%)
                 </td>
               </tr>
             </tbody>
@@ -80,7 +81,7 @@ export default function PortfolioTable({ data, summary }: Props) {
                     className="font-bold text-lg"
                     style={{ color: getGainLossColor(entry.gainLoss) }}
                   >
-                    ${entry.gainLoss.toFixed(2)}
+                    {formatCurrency(entry.gainLoss)}
                   </div>
                   <div
                     className="text-sm"
@@ -98,15 +99,15 @@ export default function PortfolioTable({ data, summary }: Props) {
                 </div>
                 <div>
                   <span className="text-gray-400">Current Price:</span>
-                  <div className="text-white font-medium">${entry.currentPrice.toFixed(2)}</div>
+                  <div className="text-white font-medium">{formatCurrency(entry.currentPrice)}</div>
                 </div>
                 <div>
                   <span className="text-gray-400">Total Cost:</span>
-                  <div className="text-white font-medium">${entry.totalCost.toFixed(2)}</div>
+                  <div className="text-white font-medium">{formatCurrency(entry.totalCost)}</div>
                 </div>
                 <div>
                   <span className="text-gray-400">Current Value:</span>
-                  <div className="text-white font-medium">${entry.currentValue.toFixed(2)}</div>
+                  <div className="text-white font-medium">{formatCurrency(entry.currentValue)}</div>
                 </div>
               </div>
             </div>
@@ -118,11 +119,11 @@ export default function PortfolioTable({ data, summary }: Props) {
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
                 <div className="text-gray-400 text-sm">Total Cost</div>
-                <div className="text-white font-bold text-lg">${summary.totalCost.toFixed(2)}</div>
+                <div className="text-white font-bold text-lg">{formatCurrency(summary.totalCost)}</div>
               </div>
               <div className="text-center">
                 <div className="text-gray-400 text-sm">Current Value</div>
-                <div className="text-white font-bold text-lg">${summary.totalValue.toFixed(2)}</div>
+                <div className="text-white font-bold text-lg">{formatCurrency(summary.totalValue)}</div>
               </div>
             </div>
             <div className="text-center mt-4 pt-4 border-t border-gray-700">
@@ -131,7 +132,7 @@ export default function PortfolioTable({ data, summary }: Props) {
                 className="font-bold text-xl"
                 style={{ color: getGainLossColor(summary.totalGainLoss) }}
               >
-                ${summary.totalGainLoss.toFixed(2)} ({gainLossPercent.toFixed(2)}%)
+                {formatCurrency(summary.totalGainLoss)} ({gainLossPercent.toFixed(2)}%)
               </div>
             </div>
           </div>
