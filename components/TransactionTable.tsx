@@ -34,7 +34,7 @@ export default function TransactionHistoryTable({
   const hasPagination = showPagination && onPageChange && totalPages > 1
 
   return (
-    <div className="w-[66.67%] shadow-lg bg-white/5 backdrop-blur-md border-r border-white/10 rounded-lg">
+    <div className="w-[95%] md:w-[66.67%] shadow-lg bg-white/5 backdrop-blur-md border-r border-white/10 rounded-lg">
       <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <h1 className="text-white font-bold text-center text-lg sm:text-xl mb-4">Transaction History</h1>
 
