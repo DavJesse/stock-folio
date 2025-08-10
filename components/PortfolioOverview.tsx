@@ -67,7 +67,7 @@ export default function PortfolioOverview() {
     loadPortfolio()
   }, [])
 
-  if (loading) return <p className="text-[var(--success-color)]">Loading portfolio...</p>
+  if (loading) return <p className="text-[var(--success-color)] text-center">Loading portfolio...</p>
   if (error) return <p className="text-[var(--warning-color)]">{error}</p>
   if (!portfolio.length || !summary) return <p className="text-gray-400">No portfolio data available.</p>
 
