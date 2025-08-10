@@ -2,14 +2,15 @@
 
 import { TransactionRow } from '@/types/transaction'
 import { format } from 'date-fns'
+import formatCurrency from '@/lib/format/format-currency'
 
 type Props = {
-  transactions: TransactionRow[]
-  isLoading: boolean
-  currentPage?: number
-  totalCount?: number
-  onPageChange?: (page: number) => void
-  showPagination?: boolean
+  readonly transactions: TransactionRow[]
+  readonly isLoading: boolean
+  readonly currentPage?: number
+  readonly totalCount?: number
+  readonly onPageChange?: (page: number) => void
+  readonly showPagination?: boolean
 }
 
 // Returns a color depending on transaction type: green for 'buy', red for 'sell'
@@ -26,7 +27,7 @@ export default function TransactionHistoryTable({
   showPagination = true,
 }: Props) {
   if (isLoading) {
-    return <p className="text-white text-center py-4">Loading transactions...</p>
+    return <p className="text-[var(--success-color)] text-center py-4">Loading transactions...</p>
   }
 
   const totalPages = Math.ceil(totalCount / 10)
@@ -69,9 +70,9 @@ export default function TransactionHistoryTable({
                         {tx.type.toUpperCase()}
                       </td>
                       <td className="px-4 py-2 border border-gray-700">{tx.quantity}</td>
-                      <td className="px-4 py-2 border border-gray-700">${tx.price.toFixed(2)}</td>
+                      <td className="px-4 py-2 border border-gray-700">{formatCurrency(tx.price)}</td>
                       <td className="px-4 py-2 border border-gray-700">
-                        ${(tx.quantity * tx.price).toFixed(2)}
+                        {formatCurrency(tx.quantity * tx.price)}
                       </td>
                     </tr>
                   ))}
@@ -106,11 +107,11 @@ export default function TransactionHistoryTable({
                     </div>
                     <div>
                       <div className="text-gray-400">Price</div>
-                      <div>${tx.price.toFixed(2)}</div>
+                      <div>{formatCurrency(tx.price)}</div>
                     </div>
                     <div className="col-span-2">
                       <div className="text-gray-400">Total</div>
-                      <div className="font-semibold">${(tx.quantity * tx.price).toFixed(2)}</div>
+                      <div className="font-semibold">{formatCurrency(tx.quantity * tx.price)}</div>
                     </div>
                   </div>
                 </div>
