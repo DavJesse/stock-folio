@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromSessionCookie } from '@/lib/security/get-user-from-session-cookie'
 
+interface FinnhubSearchResult {
+  description: string
+  displaySymbol: string
+  symbol: string
+  type: string
+}
+
 /**
  * GET handler for stock search endpoint.
  * Accepts a query parameter `q`, validates it, and forwards the request to the Finnhub API.
@@ -46,8 +53,14 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await res.json()
+
+    // Filter out stocks with a dot in the symbol (e.g., ETFs)
+    const filteredResults = (data.result as FinnhubSearchResult[]).filter(
+      (stock) => !stock.symbol.includes('.')
+    )
+
     // Return successful result from the API
-    return NextResponse.json({ result: data.result || [] }, { status: 200 })
+    return NextResponse.json({ result: filteredResults }, { status: 200 })
     
   } catch (error) {
     // Log and return internal error
