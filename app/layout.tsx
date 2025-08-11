@@ -6,8 +6,11 @@ import './globals.css'
  * This object is used internally by the framework (e.g. <Head /> injection).
  */
 export const metadata = {
-  title: 'stock-portfolio-tracker',
+  title: 'StockFolio',
   description: 'Lantel Github assessment by David Jesse Odhiambo',
+    icons: {
+    icon: "/favicon.ico",
+  },
 }
 
 /**
@@ -17,7 +20,7 @@ export const metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  readonly children: React.ReactNode
 }) {
   return (
     <html lang="en">
