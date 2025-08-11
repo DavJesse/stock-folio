@@ -11,33 +11,33 @@ test.describe('E2E: Stock buy', () => {
   })
 
   test('logs in, searches for stock, opens modal, and buys shares', async ({ page }) => {
-    // Mock search API
-    await page.route('**/api/stocks/**', async route => {
-      // console.log('Intercepted search request:', route.request().url())
-      const mockResults = [
-        { symbol: 'AAPL', description: 'APPLE INC Common Stock', type: 'EQUITY' }
-      ]
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(mockResults)
-      })
-    })
+    // // Mock search API
+    // await page.route('**/api/stocks/**', async route => {
+    //   // console.log('Intercepted search request:', route.request().url())
+    //   const mockResults = [
+    //     { symbol: 'AAPL', description: 'APPLE INC Common Stock', type: 'EQUITY' }
+    //   ]
+    //   await route.fulfill({
+    //     status: 200,
+    //     contentType: 'application/json',
+    //     body: JSON.stringify(mockResults)
+    //   })
+    // })
 
-    // Mock buy API
-    await page.route('**/api/transactions/buy', async route => {
-      // console.log('Intercepted buy request:', route.request().url())
-      const body = await route.request().postDataJSON()
-      // console.log('Buy request body:', body)
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          cash_balance: 10000 - body.quantity * body.price,
-          portfolio: { symbol: body.symbol, quantity: body.quantity, average_price: body.price }
-        })
-      })
-    })
+    // // Mock buy API
+    // await page.route('**/api/transactions/buy', async route => {
+    //   // console.log('Intercepted buy request:', route.request().url())
+    //   const body = await route.request().postDataJSON()
+    //   // console.log('Buy request body:', body)
+    //   await route.fulfill({
+    //     status: 200,
+    //     contentType: 'application/json',
+    //     body: JSON.stringify({
+    //       cash_balance: 10000 - body.quantity * body.price,
+    //       portfolio: { symbol: body.symbol, quantity: body.quantity, average_price: body.price }
+    //     })
+    //   })
+    // })
 
     // Navigate to homepage
     await page.goto('/')
