@@ -21,7 +21,7 @@ export default function EditableField({ label, value, editable, onChange }: Edit
           type="text"
           value={value}
           onChange={e => onChange?.(e.target.value)}
-          className="w-full p-2 rounded bg-white/10 border border-white/20 text-white"
+          className="bg-[var(--primary-background)] text-white py-1 px-2 w-full border-2 border-gray-600/50 rounded transition-all duration-300 ease-in-out focus:outline-none focus:border-blue-400 focus:shadow-xl focus:shadow-blue-400/20 hover:border-gray-500/70"
         />
       ) : (
         // Render static text if not editable
