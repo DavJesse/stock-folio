@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import ProfileHeader from '@/components/ProfileHeader'
 import PersonalInfoCard from '@/components/PersonalInfoCard'
+import ChangePasswordCard from '@/components/ChangePaswordCard'
 import StockSearchBar from '@/components/SearchBar'
 import { User } from '@/types/user'
 
@@ -44,6 +45,9 @@ export default function AccountManagementPage() {
 
           {/* User personal information */}
           <PersonalInfoCard user={user} />
+
+          {/* Change password card */}
+          <ChangePasswordCard />
         </>
       ) : (
         // Loading state
