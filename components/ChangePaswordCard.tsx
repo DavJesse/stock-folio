@@ -96,7 +96,7 @@ export default function ChangePasswordCard() {
       {success && <p className="text-[var(--success-color)] mb-2">{success}</p>}
 
       {/* Password fields */}
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <EditablePasswordField
           label="Old Password"
           value={oldPassword}
