@@ -13,6 +13,7 @@
     "db:migrate": "tsx scripts/init-db.ts"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.2.0",
     "busboy": "^1.6.0",
