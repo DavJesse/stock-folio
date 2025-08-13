@@ -21,7 +21,7 @@ const nextConfig = {
                 )
               : (
                   // Strict CSP for production to improve security
-                  "default-src 'self'; connect-src 'self' wss://ws.finnhub.io https://finnhub.io; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;"
+                  "default-src 'self'; connect-src 'self' wss://ws.finnhub.io https://finnhub.io; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;"
                 ),
           },
           {
