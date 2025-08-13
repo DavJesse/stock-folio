@@ -10,7 +10,8 @@ on:
       - 'chore/**'
       - 'auth/**'
       - 'docs/**'
-      - 'ci/**' 
+      - 'ci/**'
+      - 'hotfix/**' 
   pull_request:
     branches:
       - main
