@@ -1,6 +1,4 @@
-
-
-# Stock Portfolio Tracker
+# StockFolio: A Stock Portfolio Tracker
 
 A modern web application for simulating stock trading and tracking a virtual portfolio, built with [Next.js](https://nextjs.org). Users can search for real stocks, view live prices, simulate trades, and monitor their portfolio performance—all in a responsive, user-friendly interface.
 
@@ -9,10 +7,9 @@ A modern web application for simulating stock trading and tracking a virtual por
 ## Purpose
 
 **Why?**
-This project helps individual investors, students, and finance enthusiasts practice investment strategies and learn about the stock market—without risking real money. It solves the problem of safely exploring trading concepts, tracking performance, and visualizing market data in a realistic, interactive way.
+StockFolio helps individual investors, students, and finance enthusiasts practice investment strategies and learn about the stock market—without risking real money. It solves the problem of safely exploring trading concepts, tracking performance, and visualizing market data in a realistic, interactive way.
 
 ---
-
 
 ## Key Features
 
@@ -27,12 +24,12 @@ This project helps individual investors, students, and finance enthusiasts pract
 
 ---
 
-
 ## Installation
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v18 or later recommended)
 - [npm](https://www.npmjs.com/), [yarn](https://yarnpkg.com/), [pnpm](https://pnpm.io/), or [bun](https://bun.sh/) (choose one)
+- [Docker](https://www.docker.com/) (optional, for containerized deployment)
 
 ### Setup
 Clone the repository and install dependencies:
@@ -60,9 +57,8 @@ Start the development server:
 ```bash
 npm run dev
 # or
-```
+yarn dev
 # or
-```bash
 pnpm dev
 # or
 bun dev
@@ -82,6 +78,78 @@ npm run lint
 
 ---
 
+## Docker Deployment
+
+The application can be containerized using Docker for consistent deployment across different environments.
+
+### Building and Running with Docker
+
+1. **Build the Docker image:**
+   ```bash
+   docker build -t stockfolio .
+   ```
+
+2. **Run the container:**
+   ```bash
+   docker run -p 3000:3000 --env-file .env stockfolio
+   ```
+
+   The application will be available at [http://localhost:3000](http://localhost:3000).
+
+3. **For persistent database storage:**
+   ```bash
+   docker run -p 3000:3000 --env-file .env -v $(pwd)/data:/app/db stockfolio
+   ```
+
+### Docker Maintenance
+
+The project includes a garbage collection script to help manage Docker resources:
+
+```bash
+# Clean up unused Docker resources
+./docker-gc.sh
+```
+
+This script helps remove:
+- Stopped containers
+- Unused images
+- Dangling volumes
+- Unused networks
+
+Run it periodically to keep your Docker environment clean and free up disk space.
+
+---
+
+## Testing
+
+The project includes comprehensive testing with both unit tests and end-to-end tests using Playwright.
+
+### Running Tests
+
+**Unit Tests:**
+```bash
+npm run test
+```
+
+**Unit Tests with Coverage Report:**
+```bash
+npm run test:coverage
+```
+
+**End-to-End Tests:**
+```bash
+npm run test:e2e
+```
+
+### Test Structure
+
+- **Unit Tests:** Test individual components and functions in isolation
+- **End-to-End Tests:** Use Playwright to test complete user workflows and interactions
+- **Coverage Reports:** Generate detailed coverage reports to ensure code quality
+
+Make sure to run tests before deploying to ensure application stability and reliability.
+
+---
 
 ## Usage
 
@@ -94,13 +162,11 @@ npm run lint
 
 <!-- ---
 
-
 ## Screenshots -->
 
 <!-- Add screenshots of the main UI pages here (e.g., search, portfolio, trade simulation) -->
 
 ---
-
 
 ## Resources
 
@@ -111,7 +177,6 @@ npm run lint
 
 ---
 
-
 ## API Usage Notes
 
 - The app uses a free-tier stock data API. Be aware of rate limits and quotas (see provider documentation).
@@ -119,13 +184,17 @@ npm run lint
 
 ---
 
-
 ## Contributing
 
 Contributions are welcome! Please open issues or submit pull requests for new features, bug fixes, or improvements. Kindly follow the [contributing guidelines](docs/CONTRIBUTING.md) for setup, workflow, and code standards.
 
----
+Before submitting changes:
+1. Run the test suite: `npm run test`
+2. Ensure end-to-end tests pass: `npm run test:e2e`
+3. Verify code coverage: `npm run test:coverage`
+4. Test Docker build: `docker build -t stockfolio .`
 
+---
 
 ## License
 
@@ -133,18 +202,21 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 ---
 
-
 ## Acknowledgments
 
 - [Next.js](https://nextjs.org/)
 - [Finnhub.io](https://finnhub.io/)
 - [Vercel](https://vercel.com/)
+- [Playwright](https://playwright.dev/) for end-to-end testing
 
 ---
 
-
 ## Deployment
 
-The easiest way to deploy your Next.js app is with [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) or [Netlify](https://www.netlify.com/). See the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The easiest way to deploy your Next.js app is with [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) or [Netlify](https://www.netlify.com/). 
+
+For containerized deployments, use the provided Dockerfile with your preferred container orchestration platform (Docker Compose, Kubernetes, etc.).
+
+See the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 ---
