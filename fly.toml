@@ -1,0 +1,25 @@
+# fly.toml app configuration file generated for stockfolio on YYYY-MM-DDT12:00:00Z
+app = "stockfolio"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3000"
+  FINNHUB_API_KEY=d1uuc39r01qr9d9i8r90d1uuc39r01qr9d9i8r9g
+  NEXT_PUBLIC_BASE_URL=https://david-jesse-assessment.fly.dev/
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+# Define a persistent volume for SQLite
+[mounts]
+  source = "stockfolio_data"
+  destination = "/db"
