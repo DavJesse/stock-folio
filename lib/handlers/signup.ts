@@ -17,6 +17,7 @@ export async function handleSignup(
 ): Promise<{ status: number; body: object }> {
   const { email, password, first_name, last_name, image } = payload
   const sanitizedImage = image ?? ''
+  const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/;
 
   if (
     typeof email !== 'string' ||
@@ -34,6 +35,22 @@ export async function handleSignup(
     }
   }
 
+  // Validate field lengths for irregularities
+  if (email.length > 255 || first_name.length > 100 || last_name.length > 100) {
+    return {
+      status: 400,
+      body: { error: 'Input too long.' },
+    }
+  }
+
+  // Check email format
+  if (!emailRegex.test(email)) {
+    return {
+      status: 400,
+      body: { error: 'Invalid email format.' },
+    }
+  }
+
   // Check password strength
   if (!isStrongPassword(password)) {
     return {
@@ -42,6 +59,14 @@ export async function handleSignup(
         error:
           'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.',
       },
+    }
+  }
+
+  // Check image file length
+  if (sanitizedImage && sanitizedImage.length > 500) {
+    return {
+      status: 400,
+      body: { error: 'Image URL too long.' },
     }
   }
 
