@@ -24,6 +24,11 @@ StockFolio helps individual investors, students, and finance enthusiasts practic
 
 ---
 
+## Video Demonstration
+Here's a link to a [video demostration of how to navigate and use StockFolio](https://www.loom.com/share/8bb7bee5ade54b1c860870f61c9ed7bc?sid=9addeb65-ad3a-422d-b0c3-38d1986111f0)
+
+---
+
 ## Installation
 
 ### Prerequisites
