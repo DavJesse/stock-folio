@@ -1,14 +1,16 @@
-import { readFileSync } from 'fs'; // Node.js file system module for reading migration files
-import db from './db';
+import { readFileSync } from 'fs'
+import db from './db'
 
 /**
- * Runs a database migration by executing the SQL schema from the specified file.
- * @param path - Absolute or relative path to the migration SQL file.
+ * Runs a SQL migration file using the Turso (libSQL) client.
+ * Supports multi-statement SQL files.
+ *
+ * @param path - Path to the migration .sql file
  */
-export function runMigration(path: string) {
-    // Read the SQL schema from the migration file as a UTF-8 string
-    const schema = readFileSync(path, 'utf8');
+export async function runMigration(path: string) {
+  // Read the SQL file
+  const schema = readFileSync(path, 'utf8')
 
-    // Execute the schema against the database connection
-    db.exec(schema);
+  // Execute migration (Turso supports multi-statement SQL)
+  await db.execute(schema)
 }
