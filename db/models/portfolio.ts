@@ -1,21 +1,27 @@
-import db from '@/lib/db'
+import db from '@/lib/db';
 
 export interface Holding {
-  id: number
-  user_id: number
-  symbol: string
-  quantity: number
-  average_price: number
+  id: number;
+  user_id: number;
+  symbol: string;
+  quantity: number;
+  average_price: number;
 }
 
 /**
  * Retrieves a specific holding for a user based on stock symbol.
  * Returns `undefined` if no holding exists.
  */
-export async function getHolding(userId: number, symbol: string): Promise<Holding | undefined> {
-  return db
-    .prepare('SELECT * FROM portfolio WHERE user_id = ? AND symbol = ?')
-    .get(userId, symbol) as Holding | undefined
+export async function getHolding(
+  userId: number,
+  symbol: string
+): Promise<Holding | undefined> {
+  const result = await db.execute({
+    sql: `SELECT * FROM portfolio WHERE user_id = ? AND symbol = ?`,
+    args: [userId, symbol],
+  });
+
+  return (result.rows[0] as unknown as Holding) ?? undefined;
 }
 
 /**
@@ -27,15 +33,18 @@ export async function insertHolding(
   quantity: number,
   avgPrice: number
 ): Promise<void> {
-  db.prepare(
-    `INSERT INTO portfolio (user_id, symbol, quantity, average_price)
-     VALUES (?, ?, ?, ?)`
-  ).run(userId, symbol, quantity, avgPrice)
+  await db.execute({
+    sql: `
+      INSERT INTO portfolio (user_id, symbol, quantity, average_price)
+      VALUES (?, ?, ?, ?)
+    `,
+    args: [userId, symbol, quantity, avgPrice],
+  });
 }
 
 /**
  * Updates both the quantity and average price for an existing holding.
- * Also sets `updated_at` to the current timestamp.
+ * Also sets `updated_at` to the current time.
  */
 export async function updateHoldingQuantityAndPrice(
   userId: number,
@@ -43,19 +52,25 @@ export async function updateHoldingQuantityAndPrice(
   newQuantity: number,
   newAvgPrice: number
 ): Promise<void> {
-  db.prepare(
-    `UPDATE portfolio
-     SET quantity = ?, average_price = ?, updated_at = CURRENT_TIMESTAMP
-     WHERE user_id = ? AND symbol = ?`
-  ).run(newQuantity, newAvgPrice, userId, symbol)
+  await db.execute({
+    sql: `
+      UPDATE portfolio
+      SET quantity = ?, average_price = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE user_id = ? AND symbol = ?
+    `,
+    args: [newQuantity, newAvgPrice, userId, symbol],
+  });
 }
 
 /**
- * Deletes a holding from the portfolio based on user and symbol.
+ * Deletes a holding from the portfolio.
  */
 export async function deleteHolding(userId: number, symbol: string): Promise<void> {
-  db.prepare(
-    `DELETE FROM portfolio
-     WHERE user_id = ? AND symbol = ?`
-  ).run(userId, symbol)
+  await db.execute({
+    sql: `
+      DELETE FROM portfolio
+      WHERE user_id = ? AND symbol = ?
+    `,
+    args: [userId, symbol],
+  });
 }

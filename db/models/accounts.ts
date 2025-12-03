@@ -1,9 +1,9 @@
-import db from '@/lib/db'
+import db from '@/lib/db';
 
 export interface Account {
-  id: number
-  user_id: number
-  cash_balance: number
+  id: number;
+  user_id: number;
+  cash_balance: number;
 }
 
 /**
@@ -11,9 +11,13 @@ export interface Account {
  * Returns `undefined` if no account is found.
  */
 export async function getAccountByUserId(userId: number): Promise<Account | undefined> {
-  return db
-    .prepare('SELECT * FROM accounts WHERE user_id = ?')
-    .get(userId) as Account | undefined // Return account object or undefined
+  const result = await db.execute({
+    sql: "SELECT * FROM accounts WHERE user_id = ?",
+    args: [userId],
+  });
+
+  // result.rows is an array of records
+  return (result.rows[0] as unknown as Account) ?? undefined;
 }
 
 /**
@@ -21,7 +25,12 @@ export async function getAccountByUserId(userId: number): Promise<Account | unde
  * Also updates the `updated_at` timestamp to the current time.
  */
 export async function updateCashBalance(userId: number, newBalance: number): Promise<void> {
-  db.prepare(
-    'UPDATE accounts SET cash_balance = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?'
-  ).run(newBalance, userId) // Execute update with new balance
+  await db.execute({
+    sql: `
+      UPDATE accounts
+      SET cash_balance = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE user_id = ?
+    `,
+    args: [newBalance, userId],
+  });
 }
