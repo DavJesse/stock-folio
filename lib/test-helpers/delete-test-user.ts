@@ -6,19 +6,26 @@ import db from '@/lib/db'
  *
  * This function is used for cleanup in testing environments.
  */
-export default function deleteTestUserByEmail(email: string) {
+export default async function deleteTestUserByEmail(email: string) {
   try {
     // Get the user ID first
-    const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email) as { id: number } | undefined;
-            
-    if (user) {
-      // Delete in correct order: child records first
-      db.prepare('DELETE FROM transactions WHERE user_id = ?').run(user.id);
-      db.prepare('DELETE FROM portfolio WHERE user_id = ?').run(user.id); // Fixed: Added .run(user.id)
-      db.prepare('DELETE FROM sessions WHERE user_id = ?').run(user.id);
-      db.prepare('DELETE FROM accounts WHERE user_id = ?').run(user.id);
-      db.prepare('DELETE FROM users WHERE email = ?').run(email);
-    }
+    const result = await db.execute({
+      sql: 'SELECT id FROM users WHERE email = ?',
+      args: [email],
+    });
+
+    const user = result.rows[0];
+    if (!user) return;
+
+    const userId = user.id;
+
+    // Delete in correct order: child records first
+    await db.execute({ sql: 'DELETE FROM transactions WHERE user_id = ?', args: [userId] });
+    await db.execute({ sql: 'DELETE FROM portfolio WHERE user_id = ?', args: [userId] });
+    await db.execute({ sql: 'DELETE FROM sessions WHERE user_id = ?', args: [userId] });
+    await db.execute({ sql: 'DELETE FROM accounts WHERE user_id = ?', args: [userId] });
+    await db.execute({ sql: 'DELETE FROM users WHERE email = ?', args: [email] });
+
   } catch (error) {
     console.error('Error deleting test user:', error);
   }

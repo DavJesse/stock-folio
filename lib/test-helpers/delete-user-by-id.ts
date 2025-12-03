@@ -1,41 +1,45 @@
 import db from '@/lib/db'
 
 /**
- * Deletes a test user and all their associated records from the database,
+ * Deletes a user and all their associated records from the database,
  * based on their user ID.
  *
  * This function is used for cleanup in testing environments.
  *
  * @param userId - The ID of the user to delete
  */
-export default function deleteUserByUserId(userId: number) {
-  // Step 1: Check if the user exists
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId)
-  if (!user) {
-    return // Exit early if user doesn't exist
-  }
-
-  // Step 2: Prepare deletion statements for related data
-  const deleteTransactionsStmt = db.prepare('DELETE FROM transactions WHERE user_id = ?')
-  const deletePortfolioStmt = db.prepare('DELETE FROM portfolio WHERE user_id = ?')
-  const deleteAccountsStmt = db.prepare('DELETE FROM accounts WHERE user_id = ?')
-  const deleteSessionsStmt = db.prepare('DELETE FROM sessions WHERE user_id = ?')
-  const deleteUserStmt = db.prepare('DELETE FROM users WHERE id = ?')
-
-  // Step 3: Execute all deletions in a single atomic transaction
-  const transaction = db.transaction((id: number) => {
-    deleteTransactionsStmt.run(id)
-    deletePortfolioStmt.run(id)
-    deleteAccountsStmt.run(id)
-    deleteSessionsStmt.run(id)
-    deleteUserStmt.run(id)
-  })
-
-  // Step 4: Run the transaction
+export default async function deleteUserByUserId(userId: number) {
   try {
-    transaction(userId)
+    // Step 1: Check if the user exists
+    const res = await db.execute({
+      sql: 'SELECT id FROM users WHERE id = ?',
+      args: [userId],
+    })
+
+    if (res.rows.length === 0) return
+
+    // Step 2: Start transaction
+    await db.execute('BEGIN')
+
+    // Step 3: Delete related records
+    await db.execute({ sql: 'DELETE FROM transactions WHERE user_id = ?', args: [userId] })
+    await db.execute({ sql: 'DELETE FROM portfolio WHERE user_id = ?', args: [userId] })
+    await db.execute({ sql: 'DELETE FROM accounts WHERE user_id = ?', args: [userId] })
+    await db.execute({ sql: 'DELETE FROM sessions WHERE user_id = ?', args: [userId] })
+
+    // Step 4: Delete the user
+    await db.execute({ sql: 'DELETE FROM users WHERE id = ?', args: [userId] })
+
+    // Step 5: Commit
+    await db.execute('COMMIT')
   } catch (error) {
     console.error('Error deleting user by ID:', error)
-    throw error // Re-throw to allow caller to handle if needed
+
+    // Roll back if anything fails
+    try {
+      await db.execute('ROLLBACK')
+    } catch {}
+
+    throw error
   }
 }
