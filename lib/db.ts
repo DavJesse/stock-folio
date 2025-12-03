@@ -1,14 +1,8 @@
-import Database from 'better-sqlite3';
-import path from 'path';
+import { createClient } from '@libsql/client';
 
-// Resolve the path to the SQLite database file
-const dbPath = path.resolve(process.cwd(), 'db/db.sqlite');
+const db = createClient({
+  url: process.env.DATABASE_URI!,
+  authToken: process.env.DATABASE_API_TOKEN!,
+});
 
-// Create a persistent database connection
-const db = new Database(dbPath);
-
-// Enable foreign key constraint enforcement
-db.pragma('foreign_keys = ON');
-
-// Export the database instance for use across the application
 export default db;
